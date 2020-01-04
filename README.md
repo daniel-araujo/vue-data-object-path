@@ -1,7 +1,7 @@
 # vue-data-object-path
 
-This plugin adds methods for retrieving, modifying and deleting observable data
-properties with paths encoded as arrays.
+This plugin adds methods for retrieving and modifying observable data properties
+with paths encoded as arrays.
 
 Tested with Vue 2.6.
 
@@ -59,31 +59,6 @@ $objectPath.set(['b', 'c'], 'm'); // this.b.c is 'm'.
                                   // this.b is { c: 'm' }.
 $objectPath.set(['c', 1], 'm'); // this.c[1] is 1.
                                 // this.c is [undefined, 1].
-
-// Pushes an element into an array. Note that push can also create
-// intermediate objects and arrays.
-$objectPath.push(['a', 'c'], 'o');
-
-// Removes the last element of the array.
-$objectPath.pop(['a', 'c']);
-
-// Removes 1 element from the array.
-$objectPath.splice(['a', 'c', 0], 1); // this.a.c is now ['f', 'g']
-
-// Removes 1 element and inserts 2 elements at the given index.
-$objectPath.splice(['a', 'c', 0], 1, 'h', 'i']); // this.a.c is now ['h', 'i', 'g']
-
-// Removes all elements starting from the given index.
-$objectPath.splice(['a', 'c', 1]); // this.a.c is now ['h']
-
-// Deletes a property from an object.
-$objectPath.delete(['a', 'b'); // this.a.b is now undefined.
-
-// Empties an array.
-$objectPath.empty(['a', 'c']); // this.a.c is now [].
-
-// Empties an object.
-$objectPath.empty(['a']); // this.a is now {}.
 ```
 
 
