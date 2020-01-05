@@ -19,7 +19,7 @@ Require the module `vue-data-object-path` and pass the `VueDataObjectPath`
 property to `Vue.use`.
 
 ```js
-const { VueDataObjectPath } = require('vue-data-object-path')
+const VueDataObjectPath = require('vue-data-object-path')
 
 Vue.use(VueDataObjectPath)
 ```
