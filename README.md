@@ -23,10 +23,14 @@ const VueDataObjectPath = require('vue-data-object-path')
 Vue.use(VueDataObjectPath)
 ```
 
-You will then have access to the $objectPath object in every Vue component.
+You will then have access to the `$objectPath` object in every Vue component.
 
 
 ## Documentation
+
+The `$objectPath` property will be available on every Vue component. You can use
+it after the data method is finished executing. It provides the following
+operations:
 
 ```js
 {
@@ -54,12 +58,33 @@ $objectPath.set(['a', 'c'], 'm'); // this.a.c is now 'm'.
 // Set will create intermediate objects and arrays depending on the type. If
 // you pass a string, an object is created, if you pass a number an array is
 // created.
-$objectPath.set(['b', 'c'], 'm'); // this.b.c is 'm'.
-                                  // this.b is { c: 'm' }.
-$objectPath.set(['c', 1], 'm'); // this.c[1] is 1.
-                                // this.c is [undefined, 1].
+$objectPath.set(['a', 'd', 'c'], 'd'); // this.a.d.c is 'd'.
+                                       // this.a.d is { c: 'd' }.
+$objectPath.set(['a', 'e', 1], 'm'); // this.a.e[1] is 1.
+                                     // this.a.e is [undefined, 1].
 ```
 
+You are not allowed to create new properties in the data object. You can only
+create nested properties, either explicitly or through intermediate access:
+
+```js
+{
+  data() {
+    return {
+      existingProperty: {
+        value: 1
+      }
+    };
+  }
+}
+
+// Not allowed.
+$objectPath.set(['new-property'], 1);
+
+// Allowed.
+$objectPath.set(['existingProperty', 'value'], 2);
+$objectPath.set(['existingProperty', 'intermediateObject', 'value'], 3);
+```
 
 ## Contributing
 
