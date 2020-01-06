@@ -15,8 +15,7 @@ npm install vue-data-object-path
 
 ## Usage
 
-Require the module `vue-data-object-path` and pass the `VueDataObjectPath`
-property to `Vue.use`.
+Require the module `vue-data-object-path` and pass it to `Vue.use`.
 
 ```js
 const VueDataObjectPath = require('vue-data-object-path')
