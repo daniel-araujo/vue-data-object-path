@@ -10,7 +10,6 @@ const VUE = Symbol();
 const SET_ROOT = Symbol();
 const SET_NESTED = Symbol();
 const INTERMEDIATE_ACCESS = Symbol();
-const DEFINE_REACTIVE = Symbol();
 const DATA_OBJ = Symbol();
 
 class VueDataObjectPath {
@@ -96,10 +95,11 @@ class VueDataObjectPath {
     // Any intermediate levels are here.
     for (let i = 1; i < (path.length - 1); i++) {
       let key = path[i];
+      let nextKey = path[i + 1];
 
-      this[INTERMEDIATE_ACCESS](current, key);
+      this[INTERMEDIATE_ACCESS](current, key, nextKey);
 
-      current = this[VUE].$set(current, key, current[key]);
+      current = current[key];
     }
 
     // Last level access.
@@ -112,6 +112,7 @@ class VueDataObjectPath {
         }
       }
 
+      // Works on objects and arrays.
       this[VUE].$set(current, lastKey, value);
     }
   }
@@ -120,18 +121,19 @@ class VueDataObjectPath {
    * Creates intermediate object or array if necessary.
    * @param {object|array} current
    * @param {string|number} key
+   * @param {string|number} nextKey
    */
-  [INTERMEDIATE_ACCESS](current, key) {
-    if (typeof key === 'number') {
+  [INTERMEDIATE_ACCESS](current, key, nextKey) {
+    if (typeof nextKey === 'number') {
       // This is treated as an array.
 
       if (current[key] === undefined) {
         this[VUE].$set(current, key, []);
       }
 
-      if (key < 0) {
+      if (nextKey < 0) {
         throw new Error('Negative indexes are not allowed.');
-      } else if (key > current.length) {
+      } else if (nextKey > current[key].length) {
         // Out of range. Extend array.
         current.length = key;
       }

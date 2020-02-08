@@ -147,6 +147,18 @@ describe('VueDataObjectPath', () => {
     });
 
     describe('nested array', () => {
+      it('creates array if it does not exist', () => {
+        let vue = new Vue({
+          data: { nested: {} }
+        });
+
+        vue.$objectPath.set(['nested', 'array', 0], 'value');
+
+        assert(vue.nested.array instanceof Array);
+        assert.equal(vue.nested.array.length, 1);
+        assert.equal(vue.nested.array[0], 'value');
+      });
+
       it('overwrites existing value', () => {
         let vue = new Vue({
           data: {
