@@ -64,7 +64,7 @@ class VueDataObjectPath {
   /**
    * Deletes a value.
    * Note that this behaves like the delete operator. This means that arrays
-   * are not resized.
+   * are not resized. Use the splice method if you need that behavior.
    * @param {any[]} path
    */
   delete(path) {
@@ -82,6 +82,45 @@ class VueDataObjectPath {
       // Works on objects and arrays alike.
       delete container[lastKey];
     }
+  }
+
+  /**
+   * Changes the contents of an array by removing or replacing existing elements
+   * and/or adding new elements.
+   * @param {any[]} path - Path to an array.
+   * @param {number} start - The index at which to start changing the array.
+   * @param {number=} deleteCount - An integer indicating the number of elements
+   * in the array to remove from start. If omitted, all the elements from start
+   * to the end of the array will be deleted. 
+   * @param {...any=} items - The elements to add to the array, beginning from
+   * start. If you do not specify any elements, this will only remove elements
+   * from the array.
+   * @returns {any[]} Elements that were removed from the array.
+   */
+  splice(path, start, deleteCount, ...items) {
+    if (path.length === 0) {
+      throw new VueDataObjectPathError('Path must not be empty.');
+    }
+
+    let container = this.get(path);
+
+    if (container === undefined) {
+      // Does not exist, do nothing.
+      return [];
+    }
+
+    if (!(container instanceof Array)) {
+      throw new Error('Path does not lead to an array.');
+    }
+
+    if (arguments.length < 3) {
+      // This is how the standard built-in arrays work when the deleteCount
+      // argument is omitted. The value undefined is treated as 0.
+      deleteCount = container.length - start;
+    }
+
+    // Works on objects and arrays alike.
+    return container.splice(start, deleteCount, ...items);
   }
 
   /**

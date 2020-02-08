@@ -318,4 +318,119 @@ describe('VueDataObjectPath', () => {
       assert(0 in vue.array === false);
     });
   });
+
+  describe('splice', () => {
+    it('throws error when providing empty path', () => {
+      let vue = new Vue({
+        data: {
+          first: 'value'
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.splice([], 0);
+        },
+        {
+          message: 'Path must not be empty.'
+        });
+    });
+
+    it('throws error when path leads to an object', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.splice(['nested'], 0);
+        },
+        {
+          message: 'Path does not lead to an array.'
+        });
+    });
+
+    it('does not throw error when path leads to undefined', () => {
+      let vue = new Vue({
+        data: {}
+      });
+
+      vue.$objectPath.splice(['doesNotExist'], 0);
+
+      // Making sure it did nothing.
+      assert(vue.doesNotExist === undefined);
+    });
+
+    it('removes all elements from start to the end of the array when deleteCount is omitted', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      vue.$objectPath.splice(['array'], 1);
+
+      // Making sure it did nothing.
+      assert.equal(vue.array.length, 1);
+      assert.equal(vue.array[0], 'one');
+      assert.equal(vue.array[1], undefined);
+    });
+
+    it('assumes 0 when deleteCount is undefined', () => {
+      // This is how standard built-in arrays work, too.
+
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      vue.$objectPath.splice(['array'], 1, undefined);
+
+      // Making sure it did nothing.
+      assert.equal(vue.array.length, 3);
+      assert.equal(vue.array[0], 'one');
+      assert.equal(vue.array[1], 'two');
+      assert.equal(vue.array[2], 'three');
+    });
+
+    it('returns empty array when path leads to undefined', () => {
+      let vue = new Vue({
+        data: {}
+      });
+
+      let result = vue.$objectPath.splice(['doesNotExist'], 0);
+
+      assert(result instanceof Array);
+      assert.equal(result.length, 0);
+    });
+
+    it('returns empty array when no elements are deleted', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.splice(['array'], 0, 0, 'one and a half');
+
+      assert(result instanceof Array);
+      assert.equal(result.length, 0);
+    });
+
+    it('returns deleted elements', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.splice(['array'], 0, 1);
+
+      assert(result instanceof Array);
+      assert.equal(result.length, 1);
+    });
+  });
 });
