@@ -244,4 +244,78 @@ describe('VueDataObjectPath', () => {
       });
     });
   });
+
+  describe('delete', () => {
+    it('throws error when providing empty path', () => {
+      let vue = new Vue({
+        data: {
+          first: 'value'
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.delete([]);
+        },
+        {
+          message: 'Path must not be empty.'
+        });
+    });
+
+    it('throws error when attempting to delete root property', () => {
+      let vue = new Vue({
+        data: {
+          first: 'value'
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.delete(['first']);
+        },
+        {
+          message: 'Vue does not support dynamic properties at the root level. Use a nested object, instead.'
+        });
+    });
+
+    it('does nothing if path does not reach an object property or an array item', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      vue.$objectPath.delete(['nested', 'doesNotExist']);
+    });
+
+    it('deletes object property like the delete operator would', () => {
+      let vue = new Vue({
+        data: {
+          nested: {
+            prop: 'value'
+          }
+        }
+      });
+
+      vue.$objectPath.delete(['nested', 'prop']);
+
+      assert.equal(vue.nested.prop, undefined);
+      assert('prop' in vue.nested === false);
+    });
+
+    it('deletes array item like the delete operator would', () => {
+      let vue = new Vue({
+        data: {
+          array: ['first', 'second']
+        }
+      });
+
+      vue.$objectPath.delete(['array', 0]);
+
+      assert.equal(vue.array.length, 2);
+      assert.equal(vue.array[0], undefined);
+      assert.equal(vue.array[1], 'second');
+      assert(0 in vue.array === false);
+    });
+  });
 });

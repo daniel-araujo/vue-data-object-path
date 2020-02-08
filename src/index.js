@@ -62,6 +62,29 @@ class VueDataObjectPath {
   }
 
   /**
+   * Deletes a value.
+   * Note that this behaves like the delete operator. This means that arrays
+   * are not resized.
+   * @param {any[]} path
+   */
+  delete(path) {
+    if (path.length === 0) {
+      throw new VueDataObjectPathError('Path must not be empty.');
+    } else if (path.length === 1) {
+      throw new VueDataObjectPathError('Vue does not support dynamic properties at the root level. Use a nested object, instead.');
+    }
+
+    let container = this.get(path.slice(0, path.length - 1));
+
+    if (typeof container === 'object') {
+      let lastKey = path[path.length - 1];
+
+      // Works on objects and arrays alike.
+      delete container[lastKey];
+    }
+  }
+
+  /**
    * For setting properties on the root level.
    */
   [SET_ROOT](path, value) {
