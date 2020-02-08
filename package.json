@@ -1,6 +1,6 @@
 {
   "name": "vue-data-object-path",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "This plugin adds methods for retrieving and modifying observable data properties with paths encoded as arrays.",
   "main": "src/index.js",
   "scripts": {
