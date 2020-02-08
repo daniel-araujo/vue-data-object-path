@@ -62,6 +62,18 @@ $objectPath.set(['a', 'd', 'c'], 'd'); // this.a.d.c is 'd'.
                                        // this.a.d is { c: 'd' }.
 $objectPath.set(['a', 'e', 1], 'm'); // this.a.e[1] is 1.
                                      // this.a.e is [undefined, 1].
+
+// Removes 1 element from the array.
+$objectPath.splice(['a', 'c'], 0, 1); // this.a.c is now ['f', 'g']
+
+// Removes 1 element and inserts 2 elements at the given index.
+$objectPath.splice(['a', 'c'], 0, 1, 'h', 'i']); // this.a.c is now ['h', 'i', 'g']
+
+// Removes all elements starting from the given index.
+$objectPath.splice(['a', 'c'], 1); // this.a.c is now ['h']
+
+// Deletes a property from an object.
+$objectPath.delete(['a', 'b'); // this.a.b is now undefined.
 ```
 
 You are not allowed to create new properties in the data object. You can only
