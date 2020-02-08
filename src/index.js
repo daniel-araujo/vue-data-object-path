@@ -28,6 +28,7 @@ class VueDataObjectPath {
   /**
    * Retrieves a value.
    * @param {any[]} path
+   * @returns {any}
    */
   get(path) {
     let current = this[DATA_OBJ]();
