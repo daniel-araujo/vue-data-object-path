@@ -106,8 +106,13 @@ class VueDataObjectPath {
     let container = this.get(path);
 
     if (container === undefined) {
-      // Does not exist, do nothing.
-      return [];
+      if (path.length === 1) {
+        throw new VueDataObjectPathError('Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.');
+      }
+
+      // Will create.
+      this.set(path, []);
+      container = this.get(path);
     }
 
     if (!(container instanceof Array)) {
@@ -120,7 +125,6 @@ class VueDataObjectPath {
       deleteCount = container.length - start;
     }
 
-    // Works on objects and arrays alike.
     return container.splice(start, deleteCount, ...items);
   }
 
