@@ -70,7 +70,7 @@ $objectPath.push(['a', 'f'], 'o'); // this.a.f is now ['o']
 // You can push multiple elements on the same call.
 $objectPath.push(['a', 'f'], 'p', 'q'); // this.a.f is now ['o', 'p', 'q']
 
-// Removes the last element of the array.
+// Removes the first element of the array.
 $objectPath.shift(['a', 'f']); // this.a.f is now ['p', 'q']
 
 // Removes the last element of the array.
