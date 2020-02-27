@@ -111,7 +111,7 @@ class VueDataObjectPath {
     }
 
     if (!(container instanceof Array)) {
-      throw new Error('Path does not lead to an array.');
+      throw new VueDataObjectPathError('Path does not lead to an array.');
     }
 
     if (arguments.length < 3) {
@@ -258,7 +258,7 @@ class VueDataObjectPath {
 
       if (typeof lastKey === 'number') {
         if (lastKey < 0) {
-          throw new Error('Negative indexes are not allowed.');
+          throw new VueDataObjectPathError('Negative indexes are not allowed.');
         }
       }
 
@@ -282,7 +282,7 @@ class VueDataObjectPath {
       }
 
       if (nextKey < 0) {
-        throw new Error('Negative indexes are not allowed.');
+        throw new VueDataObjectPathError('Negative indexes are not allowed.');
       } else if (nextKey > current[key].length) {
         // Out of range. Extend array.
         current.length = key;
