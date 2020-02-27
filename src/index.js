@@ -125,6 +125,93 @@ class VueDataObjectPath {
   }
 
   /**
+   * Adds one or more elements to the end of an array and returns the new length
+   * of the array.
+   * @param {any[]} path - Path to an array.
+   * @param {...any=} items - The elements to add to the array.
+   * @returns {number} Length of the array.
+   */
+  push(path, ...items) {
+    if (path.length === 0) {
+      throw new VueDataObjectPathError('Path must not be empty.');
+    }
+
+    let container = this.get(path);
+
+    if (container === undefined) {
+      if (path.length === 1) {
+        throw new VueDataObjectPathError('Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.');
+      }
+
+      // Will create.
+      this.set(path, []);
+      container = this.get(path);
+    }
+
+    if (!(container instanceof Array)) {
+      throw new VueDataObjectPathError('Path does not lead to an array.');
+    }
+
+    return container.push(...items);
+  }
+
+  /**
+   * Removes the last element from an array and returns that element.
+   * @param {any[]} path - Path to an array.
+   */
+  pop(path) {
+    if (path.length === 0) {
+      throw new VueDataObjectPathError('Path must not be empty.');
+    }
+
+    let container = this.get(path);
+
+    if (container === undefined) {
+      if (path.length === 1) {
+        throw new VueDataObjectPathError('Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.');
+      }
+
+      // Will create.
+      this.set(path, []);
+      container = this.get(path);
+    }
+
+    if (!(container instanceof Array)) {
+      throw new VueDataObjectPathError('Path does not lead to an array.');
+    }
+
+    return container.pop();
+  }
+
+  /**
+   * Removes the first element from an array and returns that element.
+   * @param {any[]} path - Path to an array.
+   */
+  shift(path) {
+    if (path.length === 0) {
+      throw new VueDataObjectPathError('Path must not be empty.');
+    }
+
+    let container = this.get(path);
+
+    if (container === undefined) {
+      if (path.length === 1) {
+        throw new VueDataObjectPathError('Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.');
+      }
+
+      // Will create.
+      this.set(path, []);
+      container = this.get(path);
+    }
+
+    if (!(container instanceof Array)) {
+      throw new VueDataObjectPathError('Path does not lead to an array.');
+    }
+
+    return container.shift();
+  }
+
+  /**
    * For setting properties on the root level.
    */
   [SET_ROOT](path, value) {

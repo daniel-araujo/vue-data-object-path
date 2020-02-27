@@ -63,6 +63,20 @@ $objectPath.set(['a', 'd', 'c'], 'd'); // this.a.d.c is 'd'.
 $objectPath.set(['a', 'e', 1], 'm'); // this.a.e[1] is 1.
                                      // this.a.e is [undefined, 1].
 
+// Pushes an element into an array. Note that push can also create
+// intermediate objects and arrays.
+$objectPath.push(['a', 'f'], 'o'); // this.a.f is now ['o']
+
+// You can push multiple elements on the same call.
+$objectPath.push(['a', 'f'], 'p', 'q'); // this.a.f is now ['o', 'p', 'q']
+
+// Removes the last element of the array.
+$objectPath.shift(['a', 'f']); // this.a.f is now ['p', 'q']
+
+// Removes the last element of the array.
+$objectPath.pop(['a', 'f']); // this.a.f is now ['q']
+$objectPath.pop(['a', 'f']); // this.a.f is now []
+
 // Removes 1 element from the array.
 $objectPath.splice(['a', 'c'], 0, 1); // this.a.c is now ['f', 'g']
 

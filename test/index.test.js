@@ -433,4 +433,264 @@ describe('VueDataObjectPath', () => {
       assert.equal(result.length, 1);
     });
   });
+
+  describe('push', () => {
+    it('throws error when providing empty path', () => {
+      let vue = new Vue({
+        data: {
+          first: 'value'
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.push([], 0);
+        },
+        {
+          message: 'Path must not be empty.'
+        });
+    });
+
+    it('throws error when path leads to an object', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.push(['nested'], 0);
+        },
+        {
+          message: 'Path does not lead to an array.'
+        });
+    });
+
+    it('creates array when path leads to undefined', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      vue.$objectPath.push(['nested', 'doesNotExist'], 0);
+
+      assert(vue.nested.doesNotExist instanceof Array, 'Should create array');
+      assert.equal(vue.nested.doesNotExist.length, 1, 'Should add element to array');
+      assert.equal(vue.nested.doesNotExist[0], 0, 'Should have correct element');
+    });
+
+    it('throws error if array were to be created in root', () => {
+      let vue = new Vue({
+        data: {}
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.push(['doesNotExist'], 0);
+        },
+        {
+          message: 'Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.'
+        });
+    });
+
+    it('returns new length', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.push(['array'], 'four');
+
+      assert.equal(result, 4);
+    });
+
+    it('returns correct length when adding more than one item', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.push(['array'], 'four', 'five', 'six');
+
+      assert.equal(result, 6);
+    });
+  });
+
+  describe('pop', () => {
+    it('throws error when providing empty path', () => {
+      let vue = new Vue({
+        data: {
+          first: 'value'
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.pop([]);
+        },
+        {
+          message: 'Path must not be empty.'
+        });
+    });
+
+    it('throws error when path leads to an object', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.pop(['nested']);
+        },
+        {
+          message: 'Path does not lead to an array.'
+        });
+    });
+
+    it('creates array when path leads to undefined', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      vue.$objectPath.pop(['nested', 'doesNotExist']);
+
+      assert(vue.nested.doesNotExist instanceof Array, 'Should create array');
+      assert.equal(vue.nested.doesNotExist.length, 0, 'Should be empty');
+    });
+
+    it('throws error if array were to be created in root', () => {
+      let vue = new Vue({
+        data: {}
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.pop(['doesNotExist']);
+        },
+        {
+          message: 'Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.'
+        });
+    });
+
+    it('returns removed element', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.pop(['array']);
+
+      assert.equal(vue.array.length, 2);
+      assert.equal(result, 'three');
+    });
+
+    it('returns undefined if array is empty', () => {
+      let vue = new Vue({
+        data: {
+          array: []
+        }
+      });
+
+      let result = vue.$objectPath.pop(['array']);
+
+      assert.equal(vue.array.length, 0);
+      assert.equal(result, undefined);
+    });
+  });
+
+  describe('shift', () => {
+    it('throws error when providing empty path', () => {
+      let vue = new Vue({
+        data: {
+          first: 'value'
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.shift([]);
+        },
+        {
+          message: 'Path must not be empty.'
+        });
+    });
+
+    it('throws error when path leads to an object', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.shift(['nested']);
+        },
+        {
+          message: 'Path does not lead to an array.'
+        });
+    });
+
+    it('creates array when path leads to undefined', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      vue.$objectPath.shift(['nested', 'doesNotExist']);
+
+      assert(vue.nested.doesNotExist instanceof Array, 'Should create array');
+      assert.equal(vue.nested.doesNotExist.length, 0, 'Should be empty');
+    });
+
+    it('throws error if array were to be created in root', () => {
+      let vue = new Vue({
+        data: {}
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.shift(['doesNotExist']);
+        },
+        {
+          message: 'Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.'
+        });
+    });
+
+    it('returns removed element', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.shift(['array']);
+
+      assert.equal(vue.array.length, 2);
+      assert.equal(result, 'one');
+    });
+
+    it('returns undefined if array is empty', () => {
+      let vue = new Vue({
+        data: {
+          array: []
+        }
+      });
+
+      let result = vue.$objectPath.shift(['array']);
+
+      assert.equal(vue.array.length, 0);
+      assert.equal(result, undefined);
+    });
+  });
 });
