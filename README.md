@@ -34,12 +34,14 @@ operations:
 
 ```js
 {
-  data: {
-    a: {
-      b: 'd',
-      c: ['e', 'f', 'g'],
-      'dot.dot': 'value'
-    }
+  data() {
+    return {
+      a: {
+        b: 'd',
+        c: ['e', 'f', 'g'],
+        'dot.dot': 'value'
+      }
+    };
   }
 }
 
