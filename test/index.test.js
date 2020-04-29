@@ -778,6 +778,16 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('empty', () => {
+    it('fails when path is empty', () => {
+      let vue = new Vue();
+
+      assert.throws(
+        () => vue.$objectPath.empty([]),
+        {
+          message: 'Path must not be empty.'
+        });
+    });
+
     it('sets array length to 0', () => {
       let array = ['value'];
 
