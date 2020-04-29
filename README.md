@@ -3,7 +3,7 @@
 This plugin adds methods for retrieving and modifying observable data properties
 with paths encoded as arrays.
 
-Tested with Vue 2.6.
+Tested against versions 2.0, 2.1, 2.2, 2.3, 2.4, 2.5 and 2.6.
 
 
 ## Install
