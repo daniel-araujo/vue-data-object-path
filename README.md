@@ -34,14 +34,12 @@ operations:
 
 ```js
 {
-  data() {
-    return {
-      a: {
-        b: 'd',
-        c: ['e', 'f', 'g'],
-        'dot.dot': 'value'
-      }
-    };
+  data: {
+    a: {
+      b: 'd',
+      c: ['e', 'f', 'g'],
+      'dot.dot': 'value'
+    }
   }
 }
 
@@ -53,7 +51,10 @@ $objectPath.get(['a', 'dot.dot']); // returns 'value'.
 $objectPath.get(['a', 'c', 1]); // returns 'f'.
 
 // Creates a new observable property.
-$objectPath.set(['a', 'c'], 'm'); // this.a.c is now 'm'.
+$objectPath.set(['a', 'd'], 'm'); // this.a.d is now 'm'.
+
+// Deletes a property from an object.
+$objectPath.delete(['a', 'd']); // this.a.d is now undefined.
 
 // Set will create intermediate objects and arrays depending on the type. If
 // you pass a string, an object is created, if you pass a number an array is
@@ -81,13 +82,10 @@ $objectPath.pop(['a', 'f']); // this.a.f is now []
 $objectPath.splice(['a', 'c'], 0, 1); // this.a.c is now ['f', 'g']
 
 // Removes 1 element and inserts 2 elements at the given index.
-$objectPath.splice(['a', 'c'], 0, 1, 'h', 'i']); // this.a.c is now ['h', 'i', 'g']
+$objectPath.splice(['a', 'c'], 0, 1, 'h', 'i'); // this.a.c is now ['h', 'i', 'g']
 
 // Removes all elements starting from the given index.
 $objectPath.splice(['a', 'c'], 1); // this.a.c is now ['h']
-
-// Deletes a property from an object.
-$objectPath.delete(['a', 'b'); // this.a.b is now undefined.
 ```
 
 You are not allowed to create new properties in the data object. You can only
