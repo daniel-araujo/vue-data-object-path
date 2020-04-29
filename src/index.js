@@ -305,6 +305,12 @@ class VueDataObjectPath {
    * @returns {object}
    */
   [DATA_OBJ]() {
+    if (this[VUE].$data === undefined) {
+      // Assuming it has not been initialized. The user is most likely accessing
+      // this object before the data method has finished running.
+      throw new VueDataObjectPathError('Data object is not accessible. Has the component finished running the data method?');
+    }
+
     return this[VUE].$data;
   }
 };

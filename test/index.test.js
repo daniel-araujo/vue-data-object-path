@@ -5,6 +5,32 @@ const VueDataObjectPath = require('..');
 Vue.use(VueDataObjectPath);
 
 describe('VueDataObjectPath', () => {
+  describe('corner cases', () => {
+    it('fails when attempting to use before data method runs', async () => {
+      assert.rejects(
+        new Promise((resolve, reject) => {
+          new Vue({
+            data() {
+              try {
+                this.$objectPath.get(['first']);
+
+                resolve();
+              } catch (e) {
+                reject(e);
+              }
+
+              // This line only exists in case that does not fail otherwise Vue
+              // will complain about the data method not returning an object.
+              return {};
+            }
+          });
+        }),
+        {
+          message: 'Data object is not accessible. Has the component finished running the data method?'
+        });
+    });
+  });
+
   describe('get', () => {
     describe('root access', () => {
       it('retrieves value from vue property', () => {
