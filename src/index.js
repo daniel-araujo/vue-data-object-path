@@ -216,6 +216,41 @@ class VueDataObjectPath {
   }
 
   /**
+   * Empties the value at the given path. The behavior of this function depends
+   * on the type of the value:
+   *
+   * - Object: removes every property that can be iterated with a for in loop.
+   * - Array: sets length to 0
+   * - String: replaces with an empty string
+   * - Undefined: does nothing
+   *
+   * Throws an error on any other type.
+   * @param {any[]} path - Path to an array.
+   */
+  empty(path) {
+    if (path.length === 0) {
+      throw new VueDataObjectPathError('Path must not be empty.');
+    }
+
+    let value = this.get(path);
+
+    if (typeof value === 'string') {
+      // Strings are immutable in JavaScript so this value has to be replaced.
+      this.set(path, '');
+    } else if (value instanceof Array) {
+      value.length = 0;
+    } else if (typeof value === 'object') {
+      for (let key in value) {
+        delete value[key];
+      }
+    } else if (typeof value === 'undefined') {
+      // Do nothing.
+    } else {
+      throw new VueDataObjectPathError('Value cannot be emptied. Type not supported.');
+    }
+  }
+
+  /**
    * For setting properties on the root level.
    */
   [SET_ROOT](path, value) {

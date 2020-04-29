@@ -776,4 +776,213 @@ describe('VueDataObjectPath', () => {
       assert.equal(result, undefined);
     });
   });
+
+  describe('empty', () => {
+    it('sets array length to 0', () => {
+      let array = ['value'];
+
+      let vue = new Vue({
+        data: {
+          array
+        }
+      });
+
+      vue.$objectPath.empty(['array']);
+
+      assert.strictEqual(vue.array.length, 0);
+      assert.strictEqual(vue.array, array, 'Must reference same object.');
+    });
+
+    it('does nothing if array is already empty', () => {
+      let array = [];
+
+      let vue = new Vue({
+        data: {
+          array
+        }
+      });
+
+      vue.$objectPath.empty(['array']);
+
+      assert.strictEqual(vue.array.length, 0);
+      assert.strictEqual(vue.array, array, 'Must reference same object.');
+    });
+
+    it('removes every key that the object owns', () => {
+      let object = {
+        first: 1,
+        second: 1,
+      };
+
+      let vue = new Vue({
+        data: {
+          object
+        }
+      });
+
+      vue.$objectPath.empty(['object']);
+
+      assert.strictEqual(Object.keys(vue.object).length, 0);
+      assert.strictEqual(vue.object.first, undefined);
+      assert.strictEqual(vue.object.second, undefined);
+      assert.strictEqual(vue.object, object, 'Must reference same object.');
+    });
+
+    it('does not remove object keys that are not enumerable', () => {
+      let object = {
+        first: 1,
+      };
+
+      Object.defineProperty(object, 'second', {
+        value: 2,
+        enumerable: false
+      });
+
+      let vue = new Vue({
+        data: {
+          object
+        }
+      });
+
+      vue.$objectPath.empty(['object']);
+
+      assert.strictEqual(Object.keys(vue.object).length, 0);
+      assert.strictEqual(vue.object.first, undefined);
+      assert.strictEqual(vue.object.second, 2);
+      assert.strictEqual(vue.object, object, 'Must reference same object.');
+    });
+
+    it('does nothing if object is already empty', () => {
+      let object = {};
+
+      let vue = new Vue({
+        data: {
+          object
+        }
+      });
+
+      vue.$objectPath.empty(['object']);
+
+      assert.strictEqual(Object.keys(vue.object).length, 0);
+      assert.strictEqual(vue.object, object, 'Must reference same object.');
+    });
+
+    it('replaces string with empty string', () => {
+      let vue = new Vue({
+        data: {
+          text: 'a'
+        }
+      });
+
+      vue.$objectPath.empty(['text']);
+
+      assert.strictEqual(typeof vue.text, 'string');
+      assert.strictEqual(vue.text.length, 0);
+    });
+
+    it('does nothing if string is already empty', () => {
+      let vue = new Vue({
+        data: {
+          text: ''
+        }
+      });
+
+      vue.$objectPath.empty(['text']);
+
+      assert.strictEqual(typeof vue.text, 'string');
+      assert.strictEqual(vue.text.length, 0);
+    });
+
+    it('does nothing if path does not lead to a value', () => {
+      let vue = new Vue({
+        data: {
+          something: '12'
+        }
+      });
+
+      vue.$objectPath.empty(['doesNotExist']);
+
+      assert.strictEqual(vue.doesNotExist, undefined);
+    });
+
+    it('does nothing if path is null', () => {
+      let vue = new Vue({
+        data: {
+          something: null
+        }
+      });
+
+      vue.$objectPath.empty(['something']);
+
+      assert.strictEqual(vue.something, null);
+    });
+
+    it('fails when value is boolean', () => {
+      let vue = new Vue({
+        data: {
+          t: true,
+          f: false
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.empty(['t']);
+        },
+        {
+          message: 'Value cannot be emptied. Type not supported.'
+        });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.empty(['f']);
+        },
+        {
+          message: 'Value cannot be emptied. Type not supported.'
+        });
+    });
+
+    it('fails when value is a number', () => {
+      let vue = new Vue({
+        data: {
+          zero: 0,
+          one: 1,
+          infinity: Infinity,
+          nan: NaN
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.empty(['zero']);
+        },
+        {
+          message: 'Value cannot be emptied. Type not supported.'
+        });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.empty(['infinity']);
+        },
+        {
+          message: 'Value cannot be emptied. Type not supported.'
+        });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.empty(['one']);
+        },
+        {
+          message: 'Value cannot be emptied. Type not supported.'
+        });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.empty(['nan']);
+        },
+        {
+          message: 'Value cannot be emptied. Type not supported.'
+        });
+    });
+  });
 });
