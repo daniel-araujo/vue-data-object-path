@@ -67,7 +67,7 @@ describe('VueDataObjectPath', () => {
 
         let value = vue.$objectPath.get(['first']);
 
-        assert.equal(value, 'value');
+        assert.strictEqual(value, 'value');
       });
 
       it('returns undefined if property does not exist', () => {
@@ -79,7 +79,7 @@ describe('VueDataObjectPath', () => {
 
         let value = vue.$objectPath.get(['doesnotexist']);
 
-        assert.equal(value, undefined);
+        assert.strictEqual(value, undefined);
       });
     });
 
@@ -95,7 +95,7 @@ describe('VueDataObjectPath', () => {
 
         let value = vue.$objectPath.get(['first', 'second']);
 
-        assert.equal(value, 'value');
+        assert.strictEqual(value, 'value');
       });
 
       it('returns undefined if root property does not exist', () => {
@@ -105,7 +105,7 @@ describe('VueDataObjectPath', () => {
 
         let value = vue.$objectPath.get(['first', 'asdfg']);
 
-        assert.equal(value, undefined);
+        assert.strictEqual(value, undefined);
       });
 
       it('returns undefined if nested property does not exist', () => {
@@ -119,7 +119,7 @@ describe('VueDataObjectPath', () => {
 
         let value = vue.$objectPath.get(['first', 'asdfg']);
 
-        assert.equal(value, undefined);
+        assert.strictEqual(value, undefined);
       });
     });
 
@@ -133,7 +133,7 @@ describe('VueDataObjectPath', () => {
 
         let value = vue.$objectPath.get(['first', 0]);
 
-        assert.equal(value, 'value');
+        assert.strictEqual(value, 'value');
       });
 
       it('returns undefined if index is out of range', () => {
@@ -145,7 +145,7 @@ describe('VueDataObjectPath', () => {
 
         let value = vue.$objectPath.get(['first', 1]);
 
-        assert.equal(value, undefined);
+        assert.strictEqual(value, undefined);
       });
     });
   });
@@ -177,7 +177,7 @@ describe('VueDataObjectPath', () => {
 
         vue.$objectPath.set(['name'], 'newvalue');
 
-        assert.equal(vue.name, 'newvalue');
+        assert.strictEqual(vue.name, 'newvalue');
       });
 
       it('fails to create property if it does not exist', () => {
@@ -206,8 +206,8 @@ describe('VueDataObjectPath', () => {
         vue.$objectPath.set(['nested', 'array', 0], 'value');
 
         assert(vue.nested.array instanceof Array);
-        assert.equal(vue.nested.array.length, 1);
-        assert.equal(vue.nested.array[0], 'value');
+        assert.strictEqual(vue.nested.array.length, 1);
+        assert.strictEqual(vue.nested.array[0], 'value');
       });
 
       it('overwrites existing value', () => {
@@ -219,7 +219,7 @@ describe('VueDataObjectPath', () => {
 
         vue.$objectPath.set(['first', 0], 'newvalue');
 
-        assert.equal(vue.first[0], 'newvalue');
+        assert.strictEqual(vue.first[0], 'newvalue');
       });
 
       it('extends array if index is out of range', () => {
@@ -231,10 +231,10 @@ describe('VueDataObjectPath', () => {
 
         vue.$objectPath.set(['first', 2], 'value');
 
-        assert.equal(vue.first.length, 3);
-        assert.equal(vue.first[0], undefined);
-        assert.equal(vue.first[1], undefined);
-        assert.equal(vue.first[2], 'value');
+        assert.strictEqual(vue.first.length, 3);
+        assert.strictEqual(vue.first[0], undefined);
+        assert.strictEqual(vue.first[1], undefined);
+        assert.strictEqual(vue.first[2], 'value');
       });
 
       it('negative indexes are not allowed', () => {
@@ -266,7 +266,7 @@ describe('VueDataObjectPath', () => {
   
         vue.$objectPath.set(['first', 'name'], 'newvalue');
   
-        assert.equal(vue.first.name, 'newvalue');
+        assert.strictEqual(vue.first.name, 'newvalue');
       });
 
       it('creates property if it does not exist', () => {
@@ -278,7 +278,7 @@ describe('VueDataObjectPath', () => {
   
         vue.$objectPath.set(['first', 'name'], 'value');
   
-        assert.equal(vue.first.name, 'value');
+        assert.strictEqual(vue.first.name, 'value');
       });
   
       it('creates nested objected when setting property of nested object', () => {
@@ -291,7 +291,7 @@ describe('VueDataObjectPath', () => {
         vue.$objectPath.set(['first', 'name', 'name2'], 'value');
   
         assert.notEqual(vue.first, undefined);
-        assert.equal(vue.first.name.name2, 'value');
+        assert.strictEqual(vue.first.name.name2, 'value');
       });
     });
   });
@@ -350,7 +350,7 @@ describe('VueDataObjectPath', () => {
 
       vue.$objectPath.delete(['nested', 'prop']);
 
-      assert.equal(vue.nested.prop, undefined);
+      assert.strictEqual(vue.nested.prop, undefined);
       assert('prop' in vue.nested === false);
     });
 
@@ -363,9 +363,9 @@ describe('VueDataObjectPath', () => {
 
       vue.$objectPath.delete(['array', 0]);
 
-      assert.equal(vue.array.length, 2);
-      assert.equal(vue.array[0], undefined);
-      assert.equal(vue.array[1], 'second');
+      assert.strictEqual(vue.array.length, 2);
+      assert.strictEqual(vue.array[0], undefined);
+      assert.strictEqual(vue.array[1], 'second');
       assert(0 in vue.array === false);
     });
   });
@@ -438,7 +438,7 @@ describe('VueDataObjectPath', () => {
 
       let result = vue.$objectPath.splice(['nested', 'doesNotExist'], 0);
 
-      assert.equal(result.length, 0);
+      assert.strictEqual(result.length, 0);
     });
 
     it('inserts elements when path is undefined', () => {
@@ -450,11 +450,11 @@ describe('VueDataObjectPath', () => {
 
       let result = vue.$objectPath.splice(['nested', 'doesNotExist'], 0, 0, 1, 2, 3);
 
-      assert.equal(result.length, 0);
-      assert.equal(vue.nested.doesNotExist.length, 3);
-      assert.equal(vue.nested.doesNotExist[0], 1);
-      assert.equal(vue.nested.doesNotExist[1], 2);
-      assert.equal(vue.nested.doesNotExist[2], 3);
+      assert.strictEqual(result.length, 0);
+      assert.strictEqual(vue.nested.doesNotExist.length, 3);
+      assert.strictEqual(vue.nested.doesNotExist[0], 1);
+      assert.strictEqual(vue.nested.doesNotExist[1], 2);
+      assert.strictEqual(vue.nested.doesNotExist[2], 3);
     });
 
     it('removes all elements from start to the end of the array when deleteCount is omitted', () => {
@@ -467,9 +467,9 @@ describe('VueDataObjectPath', () => {
       vue.$objectPath.splice(['array'], 1);
 
       // Making sure it did nothing.
-      assert.equal(vue.array.length, 1);
-      assert.equal(vue.array[0], 'one');
-      assert.equal(vue.array[1], undefined);
+      assert.strictEqual(vue.array.length, 1);
+      assert.strictEqual(vue.array[0], 'one');
+      assert.strictEqual(vue.array[1], undefined);
     });
 
     it('assumes 0 when deleteCount is undefined', () => {
@@ -484,10 +484,10 @@ describe('VueDataObjectPath', () => {
       vue.$objectPath.splice(['array'], 1, undefined);
 
       // Making sure it did nothing.
-      assert.equal(vue.array.length, 3);
-      assert.equal(vue.array[0], 'one');
-      assert.equal(vue.array[1], 'two');
-      assert.equal(vue.array[2], 'three');
+      assert.strictEqual(vue.array.length, 3);
+      assert.strictEqual(vue.array[0], 'one');
+      assert.strictEqual(vue.array[1], 'two');
+      assert.strictEqual(vue.array[2], 'three');
     });
 
     it('returns empty array when no elements are deleted', () => {
@@ -500,7 +500,7 @@ describe('VueDataObjectPath', () => {
       let result = vue.$objectPath.splice(['array'], 0, 0, 'one and a half');
 
       assert(result instanceof Array);
-      assert.equal(result.length, 0);
+      assert.strictEqual(result.length, 0);
     });
 
     it('returns deleted elements', () => {
@@ -513,7 +513,7 @@ describe('VueDataObjectPath', () => {
       let result = vue.$objectPath.splice(['array'], 0, 1);
 
       assert(result instanceof Array);
-      assert.equal(result.length, 1);
+      assert.strictEqual(result.length, 1);
     });
   });
 
@@ -560,8 +560,8 @@ describe('VueDataObjectPath', () => {
       vue.$objectPath.push(['nested', 'doesNotExist'], 0);
 
       assert(vue.nested.doesNotExist instanceof Array, 'Should create array');
-      assert.equal(vue.nested.doesNotExist.length, 1, 'Should add element to array');
-      assert.equal(vue.nested.doesNotExist[0], 0, 'Should have correct element');
+      assert.strictEqual(vue.nested.doesNotExist.length, 1, 'Should add element to array');
+      assert.strictEqual(vue.nested.doesNotExist[0], 0, 'Should have correct element');
     });
 
     it('throws error if array were to be created in root', () => {
@@ -587,7 +587,7 @@ describe('VueDataObjectPath', () => {
 
       let result = vue.$objectPath.push(['array'], 'four');
 
-      assert.equal(result, 4);
+      assert.strictEqual(result, 4);
     });
 
     it('returns correct length when adding more than one item', () => {
@@ -599,7 +599,7 @@ describe('VueDataObjectPath', () => {
 
       let result = vue.$objectPath.push(['array'], 'four', 'five', 'six');
 
-      assert.equal(result, 6);
+      assert.strictEqual(result, 6);
     });
   });
 
@@ -646,7 +646,7 @@ describe('VueDataObjectPath', () => {
       vue.$objectPath.pop(['nested', 'doesNotExist']);
 
       assert(vue.nested.doesNotExist instanceof Array, 'Should create array');
-      assert.equal(vue.nested.doesNotExist.length, 0, 'Should be empty');
+      assert.strictEqual(vue.nested.doesNotExist.length, 0, 'Should be empty');
     });
 
     it('throws error if array were to be created in root', () => {
@@ -672,8 +672,8 @@ describe('VueDataObjectPath', () => {
 
       let result = vue.$objectPath.pop(['array']);
 
-      assert.equal(vue.array.length, 2);
-      assert.equal(result, 'three');
+      assert.strictEqual(vue.array.length, 2);
+      assert.strictEqual(result, 'three');
     });
 
     it('returns undefined if array is empty', () => {
@@ -685,8 +685,8 @@ describe('VueDataObjectPath', () => {
 
       let result = vue.$objectPath.pop(['array']);
 
-      assert.equal(vue.array.length, 0);
-      assert.equal(result, undefined);
+      assert.strictEqual(vue.array.length, 0);
+      assert.strictEqual(result, undefined);
     });
   });
 
@@ -733,7 +733,7 @@ describe('VueDataObjectPath', () => {
       vue.$objectPath.shift(['nested', 'doesNotExist']);
 
       assert(vue.nested.doesNotExist instanceof Array, 'Should create array');
-      assert.equal(vue.nested.doesNotExist.length, 0, 'Should be empty');
+      assert.strictEqual(vue.nested.doesNotExist.length, 0, 'Should be empty');
     });
 
     it('throws error if array were to be created in root', () => {
@@ -759,8 +759,8 @@ describe('VueDataObjectPath', () => {
 
       let result = vue.$objectPath.shift(['array']);
 
-      assert.equal(vue.array.length, 2);
-      assert.equal(result, 'one');
+      assert.strictEqual(vue.array.length, 2);
+      assert.strictEqual(result, 'one');
     });
 
     it('returns undefined if array is empty', () => {
@@ -772,8 +772,8 @@ describe('VueDataObjectPath', () => {
 
       let result = vue.$objectPath.shift(['array']);
 
-      assert.equal(vue.array.length, 0);
-      assert.equal(result, undefined);
+      assert.strictEqual(vue.array.length, 0);
+      assert.strictEqual(result, undefined);
     });
   });
 
