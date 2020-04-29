@@ -34,7 +34,7 @@ class VueDataObjectPath {
     let current = this[DATA_OBJ]();
 
     for (let key of path) {
-      if (current[key]) {
+      if (current[key] !== undefined) {
         // We can access objects and arrays in the same way.
         current = current[key];
       } else {

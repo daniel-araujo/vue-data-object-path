@@ -32,6 +32,31 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('get', () => {
+    it('does not mistake falsy values for undefined', () => {
+      // This bug actually exists in versions prior to 1.4. That's the
+      // punishment I get for saving a couple of key strokes.
+
+      let vue = new Vue({
+        data: {
+          booleanFalse: false,
+          stringEmpty: '',
+          numberZero: 0,
+          numberNegativeZero: -0,
+          null: null,
+          nan: NaN,
+          undefined: undefined,
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.get(['undefined']), undefined);
+      assert.strictEqual(vue.$objectPath.get(['nan']), vue.nan); // Wow.
+      assert.strictEqual(vue.$objectPath.get(['null']), vue.null);
+      assert.strictEqual(vue.$objectPath.get(['numberNegativeZero']), vue.numberNegativeZero);
+      assert.strictEqual(vue.$objectPath.get(['numberZero']), vue.numberZero);
+      assert.strictEqual(vue.$objectPath.get(['stringEmpty']), vue.stringEmpty);
+      assert.strictEqual(vue.$objectPath.get(['booleanFalse']), vue.booleanFalse);
+    });
+
     describe('root access', () => {
       it('retrieves value from vue property', () => {
         let vue = new Vue({
