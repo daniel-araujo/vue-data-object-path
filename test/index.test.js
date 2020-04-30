@@ -314,22 +314,6 @@ describe('VueDataObjectPath', () => {
   describe('delete', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.delete(path));
 
-    it('throws error when providing empty path', () => {
-      let vue = new Vue({
-        data: {
-          first: 'value'
-        }
-      });
-
-      assert.throws(
-        () => {
-          vue.$objectPath.delete([]);
-        },
-        {
-          message: 'Path must not be empty.'
-        });
-    });
-
     it('throws error when attempting to delete root property', () => {
       let vue = new Vue({
         data: {
@@ -389,22 +373,6 @@ describe('VueDataObjectPath', () => {
 
   describe('splice', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.splice(path));
-
-    it('throws error when providing empty path', () => {
-      let vue = new Vue({
-        data: {
-          first: 'value'
-        }
-      });
-
-      assert.throws(
-        () => {
-          vue.$objectPath.splice([], 0);
-        },
-        {
-          message: 'Path must not be empty.'
-        });
-    });
 
     it('throws error when path leads to an object', () => {
       let vue = new Vue({
@@ -539,22 +507,6 @@ describe('VueDataObjectPath', () => {
   describe('push', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.push(path, 'value'));
 
-    it('throws error when providing empty path', () => {
-      let vue = new Vue({
-        data: {
-          first: 'value'
-        }
-      });
-
-      assert.throws(
-        () => {
-          vue.$objectPath.push([], 0);
-        },
-        {
-          message: 'Path must not be empty.'
-        });
-    });
-
     it('throws error when path leads to an object', () => {
       let vue = new Vue({
         data: {
@@ -626,22 +578,6 @@ describe('VueDataObjectPath', () => {
 
   describe('pop', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.pop(path));
-
-    it('throws error when providing empty path', () => {
-      let vue = new Vue({
-        data: {
-          first: 'value'
-        }
-      });
-
-      assert.throws(
-        () => {
-          vue.$objectPath.pop([]);
-        },
-        {
-          message: 'Path must not be empty.'
-        });
-    });
 
     it('throws error when path leads to an object', () => {
       let vue = new Vue({
@@ -715,22 +651,6 @@ describe('VueDataObjectPath', () => {
 
   describe('shift', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.shift(path));
-
-    it('throws error when providing empty path', () => {
-      let vue = new Vue({
-        data: {
-          first: 'value'
-        }
-      });
-
-      assert.throws(
-        () => {
-          vue.$objectPath.shift([]);
-        },
-        {
-          message: 'Path must not be empty.'
-        });
-    });
 
     it('throws error when path leads to an object', () => {
       let vue = new Vue({
