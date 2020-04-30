@@ -10,6 +10,11 @@
     "name": "Daniel Araujo",
     "email": "contact@daniel-araujo.pt"
   },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/daniel-araujo/vue-data-object-path.git"
