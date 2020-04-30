@@ -34,7 +34,7 @@ function createTestsForInvalidPaths(use) {
 describe('VueDataObjectPath', () => {
   describe('corner cases', () => {
     it('fails when attempting to use before data method runs', async () => {
-      assert.rejects(
+      await assert.rejects(
         new Promise((resolve, reject) => {
           new Vue({
             data() {
@@ -578,7 +578,7 @@ describe('VueDataObjectPath', () => {
       });
     });
 
-    it('does nothing if index is out of range', async () => {
+    it('does nothing if index is out of range', () => {
       let vue = new Vue({
         data: {
           array: [1]
