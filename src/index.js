@@ -403,7 +403,7 @@ VueDataObjectPath.install = function (Vue) {
 
   Vue.mixin({
     beforeCreate() {
-      this.$objectPath = new VueDataObjectPath(this);
+      this.$op = this.$objectPath = new VueDataObjectPath(this);
     }
   })
 

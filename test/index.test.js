@@ -32,6 +32,12 @@ function createTestsForInvalidPaths(use) {
 }
 
 describe('VueDataObjectPath', () => {
+  it('should have $op as a shortcut', () => {
+    let vue = new Vue();
+
+    assert.strictEqual(vue.$op, vue.$objectPath);
+  });
+
   describe('corner cases', () => {
     it('fails when attempting to use before data method runs', async () => {
       await assert.rejects(
