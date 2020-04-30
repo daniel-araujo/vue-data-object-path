@@ -369,6 +369,32 @@ describe('VueDataObjectPath', () => {
       assert.strictEqual(vue.array[1], 'second');
       assert(0 in vue.array === false);
     });
+
+    it('is reactive', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            firstLayer: {
+              secondLayer: 1
+            }
+          },
+        });
+
+        vue.$watch('firstLayer.secondLayer', (newVal, oldVal) => {
+          if (newVal === undefined) {
+            // As expected.
+            resolve();
+          } else {
+            reject(new Error('Reacted but the new value is incorrect.'));
+          }
+        });
+
+        vue.$objectPath.delete(['firstLayer', 'secondLayer']);
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
   });
 
   describe('splice', () => {

@@ -84,7 +84,7 @@ class VueDataObjectPath {
       let lastKey = path[path.length - 1];
 
       // Works on objects and arrays alike.
-      delete container[lastKey];
+      this[VUE].$delete(container, lastKey);
     }
   }
 
