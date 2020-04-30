@@ -231,10 +231,12 @@ class VueDataObjectPath {
       // Strings are immutable in JavaScript so this value has to be replaced.
       this.set(path, '');
     } else if (value instanceof Array) {
-      value.length = 0;
+      // Have to use the splice method because Vue does not react to length set
+      // to 0.
+      value.splice(0);
     } else if (typeof value === 'object') {
       for (let key in value) {
-        delete value[key];
+        this[VUE].$delete(value, key);
       }
     } else if (typeof value === 'undefined') {
       // Do nothing.
