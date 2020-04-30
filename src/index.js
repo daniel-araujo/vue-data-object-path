@@ -50,6 +50,25 @@ class VueDataObjectPath {
   }
 
   /**
+   * Inspired by the COALESCE function present in SQL based databases. Retrieves
+   * the first non-undefined and non-null value.
+   * @param {...any} path
+   * @returns {any}
+   */
+  coalesce(...paths) {
+    for (let path of paths) {
+      let value = this.get(path);
+
+      if (value !== undefined && value !== null) {
+        return value;
+      }
+    }
+
+    // No values found.
+    return undefined;
+  }
+
+  /**
    * Defines a value. Intermediate objects and arrays are created. If the key is
    * a number then an array is created, otherwise an object is.
    * @param {any[]} path

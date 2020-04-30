@@ -179,6 +179,88 @@ describe('VueDataObjectPath', () => {
     });
   });
 
+  describe('coalesce', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.coalesce(path));
+
+    it('returns undefined when path leads to no value', () => {
+      let vue = new Vue();
+
+      let value = vue.$objectPath.coalesce(['one'], ['two']);
+
+      assert.strictEqual(value, undefined);
+    });
+
+    it('returns the value of the first path that leads to a defined value', () => {
+      let vue = new Vue({
+        data: {
+          two: 'second',
+          three: 'third',
+        }
+      });
+
+      let value = vue.$objectPath.coalesce(['one'], ['two'], ['three']);
+
+      assert.strictEqual(value, 'second');
+    });
+
+    it('does not skip falsy values', () => {
+      let vue = new Vue({
+        data: {
+          booleanFalse: false,
+          stringEmpty: '',
+          numberZero: 0,
+          numberNegativeZero: -0,
+          nan: NaN
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.coalesce(['notFound'], ['nan']), vue.nan);
+      assert.strictEqual(vue.$objectPath.coalesce(['notFound'], ['numberNegativeZero']), vue.numberNegativeZero);
+      assert.strictEqual(vue.$objectPath.coalesce(['notFound'], ['numberZero']), vue.numberZero);
+      assert.strictEqual(vue.$objectPath.coalesce(['notFound'], ['stringEmpty']), vue.stringEmpty);
+      assert.strictEqual(vue.$objectPath.coalesce(['notFound'], ['booleanFalse']), vue.booleanFalse);
+    });
+
+    it('skips values that are set to null', () => {
+      let vue = new Vue({
+        data: {
+          one: null,
+          two: 'value'
+        }
+      });
+
+      let value = vue.$objectPath.coalesce(['one'], ['two']);
+
+      assert.strictEqual(value, 'value');
+    });
+
+    it('skips values that are actually set to undefined', () => {
+      let vue = new Vue({
+        data: {
+          one: undefined,
+          two: 'value'
+        }
+      });
+
+      let value = vue.$objectPath.coalesce(['one'], ['two']);
+
+      assert.strictEqual(value, 'value');
+    });
+
+    it('returns undefined when last path leads to a null value', () => {
+      let vue = new Vue({
+        data: {
+          one: undefined,
+          two: null
+        }
+      });
+
+      let value = vue.$objectPath.coalesce(['one'], ['two']);
+
+      assert.strictEqual(value, undefined);
+    });
+  });
+
   describe('set', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.set(path, 'value'));
 
