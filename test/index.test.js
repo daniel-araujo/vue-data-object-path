@@ -4,6 +4,33 @@ const VueDataObjectPath = require('..');
 
 Vue.use(VueDataObjectPath);
 
+/**
+ * Generates tests for invalid paths.
+ * @param {function} use - Receives path as an argument. This will be called to
+ * perform the test.
+ */
+function createTestsForInvalidPaths(use) {
+  it('fails when path is empty', () => {
+    let vue = new Vue();
+
+    assert.throws(
+      () => use(vue, []),
+      {
+        message: 'Path must not be empty.'
+      });
+  });
+
+  it('fails when path is not an array', () => {
+    let vue = new Vue();
+
+    assert.throws(
+      () => use(vue, {}),
+      {
+        message: 'Path must be an array.'
+      });
+  });
+}
+
 describe('VueDataObjectPath', () => {
   describe('corner cases', () => {
     it('fails when attempting to use before data method runs', async () => {
@@ -32,6 +59,8 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('get', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.get(path));
+  
     it('does not mistake falsy values for undefined', () => {
       // This bug actually exists in versions prior to 1.4. That's the
       // punishment I get for saving a couple of key strokes.
@@ -151,21 +180,7 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('set', () => {
-    it('fails if path is empty', () => {
-      // Vue does not support this.
-
-      let vue = new Vue({
-        data: {}
-      });
-
-      assert.throws(
-        () => {
-          vue.$objectPath.set([], 'value');
-        },
-        {
-          message: 'Path must not be empty'
-        });
-    });
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.set(path, 'value'));
 
     describe('root access', () => {
       it('overwrites existing value', () => {
@@ -297,6 +312,8 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('delete', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.delete(path));
+
     it('throws error when providing empty path', () => {
       let vue = new Vue({
         data: {
@@ -371,6 +388,8 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('splice', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.splice(path));
+
     it('throws error when providing empty path', () => {
       let vue = new Vue({
         data: {
@@ -518,6 +537,8 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('push', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.push(path, 'value'));
+
     it('throws error when providing empty path', () => {
       let vue = new Vue({
         data: {
@@ -604,6 +625,8 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('pop', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.pop(path));
+
     it('throws error when providing empty path', () => {
       let vue = new Vue({
         data: {
@@ -691,6 +714,8 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('shift', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.shift(path));
+
     it('throws error when providing empty path', () => {
       let vue = new Vue({
         data: {
@@ -778,15 +803,7 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('empty', () => {
-    it('fails when path is empty', () => {
-      let vue = new Vue();
-
-      assert.throws(
-        () => vue.$objectPath.empty([]),
-        {
-          message: 'Path must not be empty.'
-        });
-    });
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.empty(path));
 
     it('sets array length to 0', () => {
       let array = ['value'];

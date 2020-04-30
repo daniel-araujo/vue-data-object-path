@@ -11,6 +11,7 @@ const SET_ROOT = Symbol();
 const SET_NESTED = Symbol();
 const INTERMEDIATE_ACCESS = Symbol();
 const DATA_OBJ = Symbol();
+const SANITIZE_PATH = Symbol();
 
 class VueDataObjectPath {
   /**
@@ -31,6 +32,8 @@ class VueDataObjectPath {
    * @returns {any}
    */
   get(path) {
+    path = this[SANITIZE_PATH](path);
+
     let current = this[DATA_OBJ]();
 
     for (let key of path) {
@@ -53,9 +56,9 @@ class VueDataObjectPath {
    * @param {any} value
    */
   set(path, value) {
-    if (path.length === 0) {
-      throw new VueDataObjectPathError('Path must not be empty');
-    } else if (path.length === 1) {
+    path = this[SANITIZE_PATH](path);
+
+    if (path.length === 1) {
       return this[SET_ROOT](path, value);
     } else {
       return this[SET_NESTED](path, value);
@@ -69,9 +72,9 @@ class VueDataObjectPath {
    * @param {any[]} path
    */
   delete(path) {
-    if (path.length === 0) {
-      throw new VueDataObjectPathError('Path must not be empty.');
-    } else if (path.length === 1) {
+    path = this[SANITIZE_PATH](path);
+
+    if (path.length === 1) {
       throw new VueDataObjectPathError('Vue does not support dynamic properties at the root level. Use a nested object, instead.');
     }
 
@@ -99,9 +102,7 @@ class VueDataObjectPath {
    * @returns {any[]} Elements that were removed from the array.
    */
   splice(path, start, deleteCount, ...items) {
-    if (path.length === 0) {
-      throw new VueDataObjectPathError('Path must not be empty.');
-    }
+    path = this[SANITIZE_PATH](path);
 
     let container = this.get(path);
 
@@ -136,9 +137,7 @@ class VueDataObjectPath {
    * @returns {number} Length of the array.
    */
   push(path, ...items) {
-    if (path.length === 0) {
-      throw new VueDataObjectPathError('Path must not be empty.');
-    }
+    path = this[SANITIZE_PATH](path);
 
     let container = this.get(path);
 
@@ -164,9 +163,7 @@ class VueDataObjectPath {
    * @param {any[]} path - Path to an array.
    */
   pop(path) {
-    if (path.length === 0) {
-      throw new VueDataObjectPathError('Path must not be empty.');
-    }
+    path = this[SANITIZE_PATH](path);
 
     let container = this.get(path);
 
@@ -192,9 +189,7 @@ class VueDataObjectPath {
    * @param {any[]} path - Path to an array.
    */
   shift(path) {
-    if (path.length === 0) {
-      throw new VueDataObjectPathError('Path must not be empty.');
-    }
+    path = this[SANITIZE_PATH](path);
 
     let container = this.get(path);
 
@@ -228,9 +223,7 @@ class VueDataObjectPath {
    * @param {any[]} path - Path to an array.
    */
   empty(path) {
-    if (path.length === 0) {
-      throw new VueDataObjectPathError('Path must not be empty.');
-    }
+    path = this[SANITIZE_PATH](path);
 
     let value = this.get(path);
 
@@ -248,6 +241,24 @@ class VueDataObjectPath {
     } else {
       throw new VueDataObjectPathError('Value cannot be emptied. Type not supported.');
     }
+  }
+
+  /**
+   * Analyses path and returns a copy that can be trustworthy.
+   * @throws {VueDataObjectPathError} - If path cannot be used.
+   * @param {string[]} path
+   * @returns {string[]}
+   */
+  [SANITIZE_PATH](path) {
+    if (path.length === 0) {
+      throw new VueDataObjectPathError('Path must not be empty.');
+    }
+
+    if (!(path instanceof Array)) {
+      throw new VueDataObjectPathError('Path must be an array.');
+    }
+
+    return path.concat();
   }
 
   /**
