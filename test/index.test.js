@@ -210,6 +210,30 @@ describe('VueDataObjectPath', () => {
             message: 'Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.'
           });
       });
+
+      it('is reactive', async () => {
+        await new Promise((resolve, reject) => {
+          let vue = new Vue({
+            data: {
+              property: 'oldValue'
+            },
+          });
+
+          vue.$watch('property', (newVal, oldVal) => {
+            if (newVal === 'newValue') {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+          vue.$objectPath.set(['property'], 'newValue');
+
+          // This reject call will only work if resolve wasn't called.
+          setImmediate(() => reject(new Error('Did not react')));
+        });
+      });
     });
 
     describe('nested array', () => {
@@ -267,6 +291,32 @@ describe('VueDataObjectPath', () => {
             message: 'Negative indexes are not allowed.'
           });
       });
+
+      it('is reactive', async () => {
+        await new Promise((resolve, reject) => {
+          let vue = new Vue({
+            data: {
+              array: ['existingValue']
+            },
+          });
+
+          vue.$watch(
+            () => vue.array[1],
+            (newVal, oldVal) => {
+              if (newVal === 'newvalue') {
+                // As expected.
+                resolve();
+              } else {
+                reject(new Error('Reacted but the new value is incorrect.'));
+              }
+            });
+
+          vue.$objectPath.set(['array', 1], 'newvalue');
+
+          // This reject call will only work if resolve wasn't called.
+          setImmediate(() => reject(new Error('Did not react')));
+        });
+      });
     });
 
     describe('nested object', () => {
@@ -307,6 +357,30 @@ describe('VueDataObjectPath', () => {
   
         assert.notEqual(vue.first, undefined);
         assert.strictEqual(vue.first.name.name2, 'value');
+      });
+
+      it('is reactive', async () => {
+        await new Promise((resolve, reject) => {
+          let vue = new Vue({
+            data: {
+              first: {}
+            },
+          });
+
+          vue.$watch('first.nested.property', (newVal, oldVal) => {
+            if (newVal === 'newValue') {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+          vue.$objectPath.set(['first', 'nested', 'property'], 'newValue');
+
+          // This reject call will only work if resolve wasn't called.
+          setImmediate(() => reject(new Error('Did not react')));
+        });
       });
     });
   });
@@ -554,6 +628,32 @@ describe('VueDataObjectPath', () => {
       assert(result instanceof Array);
       assert.strictEqual(result.length, 1);
     });
+
+    it('is reactive', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            array: ['one', 'two', 'three']
+          },
+        });
+
+        vue.$watch(
+          () => vue.array[0],
+          (newVal, oldVal) => {
+            if (newVal === 'two') {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.splice(['array'], 0, 1);
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
   });
 
   describe('push', () => {
@@ -625,6 +725,32 @@ describe('VueDataObjectPath', () => {
       let result = vue.$objectPath.push(['array'], 'four', 'five', 'six');
 
       assert.strictEqual(result, 6);
+    });
+
+    it('is reactive', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            array: ['one', 'two', 'three']
+          },
+        });
+
+        vue.$watch(
+          () => vue.array[3],
+          (newVal, oldVal) => {
+            if (newVal === 'four') {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.push(['array'], 'four');
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
     });
   });
 
@@ -699,6 +825,32 @@ describe('VueDataObjectPath', () => {
       assert.strictEqual(vue.array.length, 0);
       assert.strictEqual(result, undefined);
     });
+
+    it('is reactive', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            array: ['one', 'two', 'three']
+          },
+        });
+
+        vue.$watch(
+          () => vue.array[2],
+          (newVal, oldVal) => {
+            if (newVal === undefined) {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.pop(['array']);
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
   });
 
   describe('shift', () => {
@@ -771,6 +923,32 @@ describe('VueDataObjectPath', () => {
 
       assert.strictEqual(vue.array.length, 0);
       assert.strictEqual(result, undefined);
+    });
+
+    it('is reactive', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            array: ['one', 'two', 'three']
+          },
+        });
+
+        vue.$watch(
+          () => vue.array[0],
+          (newVal, oldVal) => {
+            if (newVal === 'two') {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.shift(['array']);
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
     });
   });
 
@@ -982,6 +1160,83 @@ describe('VueDataObjectPath', () => {
         {
           message: 'Value cannot be emptied. Type not supported.'
         });
+    });
+
+    it('is reactive with strings', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            text: 'asdasd'
+          },
+        });
+
+        vue.$watch('text', (newVal, oldVal) => {
+          if (newVal === '') {
+            // As expected.
+            resolve();
+          } else {
+            reject(new Error('Reacted but the new value is incorrect.'));
+          }
+        });
+
+        vue.$objectPath.empty(['text']);
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
+
+    it('is reactive with objects', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            object: {
+              one: 1,
+              two: 2
+            }
+          },
+        });
+
+        vue.$watch('object.one', (newVal, oldVal) => {
+          if (newVal === undefined) {
+            // As expected.
+            resolve();
+          } else {
+            reject(new Error('Reacted but the new value is incorrect.'));
+          }
+        });
+
+        vue.$objectPath.empty(['object']);
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
+
+    it('is reactive with arrays', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            array: ['one', 'two', 'three']
+          },
+        });
+
+        vue.$watch(
+          () => vue.array[0],
+          (newVal, oldVal) => {
+            if (newVal === undefined) {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.empty(['array']);
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
     });
   });
 });
