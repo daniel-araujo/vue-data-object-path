@@ -247,6 +247,29 @@ $objectPath.splice(['a', 'b'], 1); // Returns ['i', 'g'] and this.a.b is now ['h
 ```
 
 
+#### `coalesce(...path)`
+
+Inspired by the COALESCE function present in SQL based databases. Retrieves the
+first non-undefined and non-null value.
+
+```js
+{
+  data() {
+    return {
+      a: {
+        b: undefined,
+        c: null,
+        e: 'value'
+      }
+    };
+  }
+}
+
+// Retrieves first non-undefined and non-null value.
+$objectPath.coalesce(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e']); // returns 'value'.
+```
+
+
 ### Caveats
 
 You cannot create new properties directly on the data object. This is a
