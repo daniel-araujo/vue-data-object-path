@@ -83,8 +83,22 @@ class VueDataObjectPath {
     if (typeof container === 'object') {
       let lastKey = path[path.length - 1];
 
-      // Works on objects and arrays alike.
-      this[VUE].$delete(container, lastKey);
+      if (container instanceof Array) {
+        // When dealing with arrays, we have to set the value to undefined
+        // because that is what the delete operator would do. Vue's $delete
+        // method works more like splice.
+
+        // Should only do something if the index is not out of range.
+        if (lastKey < container.length) {
+          // This might look silly but it is important. This makes it reactive.
+          container.splice(lastKey, 1, undefined);
+
+          // This does the actual job of deleting the element.
+          delete container[lastKey];
+        }
+      } else {
+        this[VUE].$delete(container, lastKey);
+      }
     }
   }
 

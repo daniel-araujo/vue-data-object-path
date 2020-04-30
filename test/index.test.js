@@ -495,6 +495,20 @@ describe('VueDataObjectPath', () => {
         setImmediate(() => reject(new Error('Did not react')));
       });
     });
+
+    it('does nothing if index is out of range', async () => {
+      let vue = new Vue({
+        data: {
+          array: [1]
+        },
+      });
+
+      vue.$objectPath.delete(['array', 1]);
+
+      assert.strictEqual(vue.array.length, 1);
+      assert.strictEqual(vue.array[0], 1);
+      assert(1 in vue.array === false);
+    });
   });
 
   describe('splice', () => {
