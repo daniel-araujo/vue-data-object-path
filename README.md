@@ -41,13 +41,16 @@ const VueDataObjectPath = require('vue-data-object-path')
 Vue.use(VueDataObjectPath)
 ```
 
-You will then have access to the `$objectPath` object in every Vue component.
+You will then have access to `$objectPath` and `$op` in every Vue component.
 
 
 ## Documentation
 
 The `$objectPath` property will be available on every Vue component. You can
 start using it after the data method runs.
+
+You can also use `$op` as a shortcut.
+
 
 ### Methods
 
@@ -69,14 +72,14 @@ Retrieves an object's property or an array's element.
 }
 
 // Retrieves the property of a nested object:
-$objectPath.get(['a', 'dot.dot']); // returns 'value'.
+$op.get(['a', 'dot.dot']); // returns 'value'.
 
 // Retrieves an element of an array. Note that the index of the element must
 // be passed as a number.
-$objectPath.get(['a', 'c', 1]); // returns 'f'.
+$op.get(['a', 'c', 1]); // returns 'f'.
 
 // Does not crash if intermediate paths do not exist.
-$objectPath.get(['a', 'doesNotExist', 'alsoDoeNotExist']); // returns undefined.
+$op.get(['a', 'doesNotExist', 'alsoDoeNotExist']); // returns undefined.
 ```
 
 
@@ -101,17 +104,17 @@ Intermediate paths that lead to no objects will automatically be created.
 }
 
 // Changes an existing property.
-$objectPath.set(['a', 'b'], 'm'); // this.a.b is now 'm'.
+$op.set(['a', 'b'], 'm'); // this.a.b is now 'm'.
 
 // Changes the element of an array
-$objectPath.set(['a', 'c', 1], 'm'); // this.a.c is now ['e', 'm', 'g']
+$op.set(['a', 'c', 1], 'm'); // this.a.c is now ['e', 'm', 'g']
 
 // Will create intermediate objects and arrays depending on the type of the key. If
 // you pass a string, an object is created, if you pass a number an array is
 // created.
-$objectPath.set(['a', 'd', 'c'], 'm'); // this.a.d.c is 'd'.
+$op.set(['a', 'd', 'c'], 'm'); // this.a.d.c is 'd'.
                                        // this.a.d is { c: 'm' }.
-$objectPath.set(['a', 'e', 1], 'm'); // this.a.e[1] is 'm'.
+$op.set(['a', 'e', 1], 'm'); // this.a.e[1] is 'm'.
                                      // this.a.e is [undefined, 'm'].
 ```
 
@@ -132,8 +135,8 @@ Acts very much like the delete operator.
   }
 }
 
-$objectPath.delete(['a', 'b']); // this.a.b is now undefined.
-$objectPath.delete(['a', 'c', 1]); // this.a.c is now ['e', undefined, 'g'].
+$op.delete(['a', 'b']); // this.a.b is now undefined.
+$op.delete(['a', 'c', 1]); // this.a.c is now ['e', undefined, 'g'].
 ```
 
 
@@ -153,9 +156,9 @@ Empties objects, arrays and strings.
   }
 }
 
-$objectPath.empty(['a', 'b']); // this.a.b is now ''.
-$objectPath.empty(['a', 'c']); // this.a.c is now [].
-$objectPath.empty(['a']); // this.a is now {}.
+$op.empty(['a', 'b']); // this.a.b is now ''.
+$op.empty(['a', 'c']); // this.a.c is now [].
+$op.empty(['a']); // this.a is now {}.
 ```
 
 
@@ -174,10 +177,10 @@ Works just like JavaScript's push method. Only works on Arrays.
 
 // Pushes an element into an array. Note that push can also create
 // intermediate objects and arrays.
-$objectPath.push(['a', 'b'], 'o'); // this.a.b is now ['o']
+$op.push(['a', 'b'], 'o'); // this.a.b is now ['o']
 
 // You can push multiple elements with a single function call.
-$objectPath.push(['a', 'b'], 'p', 'q'); // this.a.b is now ['o', 'p', 'q']
+$op.push(['a', 'b'], 'p', 'q'); // this.a.b is now ['o', 'p', 'q']
 ```
 
 
@@ -197,7 +200,7 @@ Works just like JavaScript's pop method. Only works on Arrays.
 }
 
 // Removes the last element of the array.
-$objectPath.pop(['a', 'b']); // Returns 'g' and this.a.b is now ['e', 'f'].
+$op.pop(['a', 'b']); // Returns 'g' and this.a.b is now ['e', 'f'].
 ```
 
 
@@ -217,7 +220,7 @@ Works just like JavaScript's shift method. Only works on Arrays.
 }
 
 // Removes the first element of the array.
-$objectPath.shift(['a', 'b']); // Returns 'e' and this.a.b is now ['f', 'g']
+$op.shift(['a', 'b']); // Returns 'e' and this.a.b is now ['f', 'g']
 ```
 
 
@@ -237,13 +240,13 @@ Works just like JavaScript's splice method. Only works on Arrays.
 }
 
 // Removes 1 element from the array.
-$objectPath.splice(['a', 'b'], 0, 1); // Returns ['e'] and this.a.b is now ['f', 'g']
+$op.splice(['a', 'b'], 0, 1); // Returns ['e'] and this.a.b is now ['f', 'g']
 
 // Removes 1 element and inserts 2 elements.
-$objectPath.splice(['a', 'b'], 0, 1, 'h', 'i'); // Returns ['f'] and this.a.b is now ['h', 'i', 'g']
+$op.splice(['a', 'b'], 0, 1, 'h', 'i'); // Returns ['f'] and this.a.b is now ['h', 'i', 'g']
 
 // Removes all elements starting from the given index.
-$objectPath.splice(['a', 'b'], 1); // Returns ['i', 'g'] and this.a.b is now ['h']
+$op.splice(['a', 'b'], 1); // Returns ['i', 'g'] and this.a.b is now ['h']
 ```
 
 
@@ -266,7 +269,7 @@ first non-undefined and non-null value.
 }
 
 // Retrieves first non-undefined and non-null value.
-$objectPath.coalesce(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e']); // returns 'value'.
+$op.coalesce(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e']); // returns 'value'.
 ```
 
 
@@ -287,11 +290,11 @@ limitation imposed by Vue.js
 }
 
 // Not allowed. Throws error.
-$objectPath.set(['newProperty'], 1);
+$op.set(['newProperty'], 1);
 
 // Allowed.
-$objectPath.set(['existingProperty', 'value'], 2);
-$objectPath.set(['existingProperty', 'intermediateObject', 'value'], 3);
+$op.set(['existingProperty', 'value'], 2);
+$op.set(['existingProperty', 'intermediateObject', 'value'], 3);
 ```
 
 
