@@ -370,7 +370,7 @@ describe('VueDataObjectPath', () => {
       assert(0 in vue.array === false);
     });
 
-    it('is reactive', async () => {
+    it('is reactive with object properties', async () => {
       await new Promise((resolve, reject) => {
         let vue = new Vue({
           data: {
@@ -390,6 +390,32 @@ describe('VueDataObjectPath', () => {
         });
 
         vue.$objectPath.delete(['firstLayer', 'secondLayer']);
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
+
+    it('is reactive with array elements', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            firstLayer: [1]
+          },
+        });
+
+        vue.$watch(
+          () => vue.firstLayer[0],
+          (newVal, oldVal) => {
+            if (newVal === undefined) {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.delete(['firstLayer', 0]);
 
         // This reject call will only work if resolve wasn't called.
         setImmediate(() => reject(new Error('Did not react')));
