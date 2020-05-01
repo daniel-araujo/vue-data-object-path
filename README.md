@@ -4,7 +4,13 @@ This Vue plugin allows you to retrieve and modify observable data properties
 using paths encoded as arrays. It creates intermediate objects and arrays for
 you. This turns out to be useful for very complex forms.
 
-Error handling example:
+Tested against the latest versions of **2.0**, **2.1**, **2.2**, **2.3**,
+**2.4**, **2.5** and **2.6** of Vue.js.
+
+
+## Example
+
+A form that contains fields for uploading attachments.
 
 ```html
 <form>
@@ -12,20 +18,21 @@ Error handling example:
   <input :value.sync="fields.name">
   <p>{{ $op.get(['errors', 'name']) }}</p>
 
-  <label>Attachments:</label>
-  <div v-for="(attachment, index) in fields.extra.attachments">
-    <file-upload :value="attachment"/>
+  <label>Attachments:</label> <button @click="addAttachment">+</button>
+  <div v-for="(attachmentId, index) in fields.extra.attachments">
+    <button @click="removeAttachment(index)">-</button
+    <file-viewer :value="attachmentId"/>
     <p>{{ $op.get(['errors', 'extra', 'attachments', index]) }}</p>
   </div>
 </form>
 ```
 
+With this data.
 
 ```js
-// Form data
 {
   fields: {
-    name: 'John Smith',
+    name: 'Montly Report 2017/01',
     extra: {
       attachments: [38475893405, 9895735794]
     }
@@ -34,16 +41,19 @@ Error handling example:
 }
 ```
 
+Validation is done on the fields. An attachment fails to pass a validation
+rule. An error message is set.
+
 ```js
-// An attachment failed to pass a validation rule. An error message is set.
 $op.set(['errors', 'extra', 'attachments', 1], 'Incorrect file format.');
 ```
 
+The data structure looks like this now.
+
 ```js
-// Form data now
 {
   fields: {
-    name: 'John Smith',
+    name: 'Montly Report 2017/01',
     extra: {
       attachments: [38475893405, 9895735794]
     }
@@ -56,19 +66,20 @@ $op.set(['errors', 'extra', 'attachments', 1], 'Incorrect file format.');
 }
 ```
 
-```js
-// User decides to remove attachment.
-$op.splice(['errors', 'extra', 'attachments'], 1, 1);
+The user decides to remove the bad attachment. Error messages can be cleared.
 
-// Error messages can be cleared.
+```js
+$op.remove(['fields', 'extra', 'attachments'], 1);
+
 $op.empty(['errors']);
 ```
 
+The data structure ends up like this.
+
 ```js
-// Form data now
 {
   form: {
-    name: 'John Smith',
+    name: 'Montly Report 2017/01',
     extra: {
       attachments: [38475893405]
     }
@@ -76,9 +87,6 @@ $op.empty(['errors']);
   errors: {}
 }
 ```
-
-Tested against the latest versions of **2.0**, **2.1**, **2.2**, **2.3**,
-**2.4**, **2.5** and **2.6** of Vue.js.
 
 
 ## Install
