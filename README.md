@@ -184,6 +184,70 @@ $op.set(['a', 'e', 1], 'm'); // this.a.e[1] is 'm'.
 ```
 
 
+#### `insert(path, start, ...items)`
+
+Adds elements to an array.
+
+If the array does not exist it will be created.
+
+Fails if the path leads to a value that is not an array.
+
+```js
+{
+  data() {
+    return {
+      a: {
+        b: ['c', 'e', 'f'],
+      }
+    };
+  }
+}
+
+// Inserting a single element.
+$op.insert(['a', 'b'], 1, 'd'); // this.a.b is now ['c', 'd', 'e', 'f']
+
+// Creating a new array and inserting an element.
+$op.insert(['a', 'c'], 0, 'd'); // this.a.c is now ['d']
+
+// Inserting multiple elements.
+$op.insert(['a', 'c'], 1, 'e', 'f'); // this.a.c is now ['d', 'e', 'f']
+```
+
+
+#### `remove(path, start, deleteCount)`
+
+Removes elements from an array.
+
+The deleteCount parameter is optional. When omitted, only a single element will
+be removed. So it is equivalent to passing 1.
+
+It returns the elements that were removed.
+
+The method does nothing if path leads to no value but fails if path leads to a
+value that is not an array.
+
+```js
+{
+  data() {
+    return {
+      a: {
+        b: ['c', 'd', 'e', 'f', 'g'],
+      }
+    };
+  }
+}
+
+// Removes element at index 1
+$op.remove(['a', 'b'], 1); // this.a.b is now ['c', 'e', 'f', 'g']
+
+// Removes 2 elements starting at index 1.
+$op.remove(['a', 'b'], 1, 2); // this.a.b is now ['c', 'g']
+
+// Does nothing when a path leads to no value.
+$op.remove(['a', 'c'], 1); // this.a.c is undefined
+```
+
+
 #### `delete(path)`
 
 Acts very much like the delete operator.
