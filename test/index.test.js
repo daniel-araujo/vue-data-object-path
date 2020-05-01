@@ -20,13 +20,43 @@ function createTestsForInvalidPaths(use) {
       });
   });
 
-  it('fails when path is not an array', () => {
+  it('fails when path is not an array or a string', () => {
     let vue = new Vue();
+
+    assert.throws(
+      () => use(vue, null),
+      {
+        message: 'Path must be an array or a string.'
+      });
+
+    assert.throws(
+      () => use(vue, undefined),
+      {
+        message: 'Path must be an array or a string.'
+      });
+
+    assert.throws(
+      () => use(vue, false),
+      {
+        message: 'Path must be an array or a string.'
+      });
+
+    assert.throws(
+      () => use(vue, 0),
+      {
+        message: 'Path must be an array or a string.'
+      });
+
+    assert.throws(
+      () => use(vue, Symbol()),
+      {
+        message: 'Path must be an array or a string.'
+      });
 
     assert.throws(
       () => use(vue, {}),
       {
-        message: 'Path must be an array.'
+        message: 'Path must be an array or a string.'
       });
   });
 }
@@ -60,6 +90,137 @@ describe('VueDataObjectPath', () => {
         }),
         {
           message: 'Data object is not accessible. Has the component finished running the data method?'
+        });
+    });
+  });
+
+  describe('string path', () => {
+    // These tests will use the get method but the underlying implementation is
+    // used in every method that takes a path.
+
+    it('accesses root property', () => {
+      let vue = new Vue({
+        data: {
+          property: 'value',
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.get('property'), 'value');
+    });
+
+    it('accesses nested property using dot notation', () => {
+      let vue = new Vue({
+        data: {
+          nested: {
+            property: 'value',
+          }
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.get('nested.property'), 'value');
+    });
+
+    it('accesses array element with square brackets', () => {
+      let vue = new Vue({
+        data: {
+          array: ['value']
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.get('array[0]'), 'value');
+    });
+
+    it('accesses the property of an object that is inside of an array', () => {
+      let vue = new Vue({
+        data: {
+          array: [
+            {
+              name: 'value'
+            }
+          ]
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.get('array[0].name'), 'value');
+    });
+
+    it('accesses the property of an object using square brackets with double quotes', () => {
+      let vue = new Vue({
+        data: {
+          nested: {
+            property: 'value',
+          }
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.get('nested["property"]'), 'value');
+    });
+
+    it('accesses the property of an object using square brackets with single quotes', () => {
+      let vue = new Vue({
+        data: {
+          nested: {
+            property: 'value',
+          }
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.get("nested['property']"), 'value');
+    });
+
+    it('throws error when using digits with dot notation', () => {
+      let vue = new Vue({
+        data: {
+          array: ['value']
+        }
+      });
+
+      assert.throws(
+        () => vue.$objectPath.get('array.0'),
+        {
+          message: 'Invalid path.'
+        });
+    });
+
+    it('throws error when non digit characters appear in brackets', () => {
+      let vue = new Vue({
+        data: {
+          array: ['value']
+        }
+      });
+
+      assert.throws(
+        () => vue.$objectPath.get('array[x]'),
+        {
+          message: 'Invalid path.'
+        });
+    });
+
+    it('throws when using hexadecimal notation in square brackets', () => {
+      let vue = new Vue({
+        data: {
+          array: ['value']
+        }
+      });
+
+      assert.throws(
+        () => vue.$objectPath.get('array[0x0]'),
+        {
+          message: 'Invalid path.'
+        });
+    });
+
+    it('throws when string is empty', () => {
+      let vue = new Vue({
+        data: {
+          array: ['value']
+        }
+      });
+
+      assert.throws(
+        () => vue.$objectPath.get(''),
+        {
+          message: 'Path must not be empty.'
         });
     });
   });

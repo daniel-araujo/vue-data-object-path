@@ -12,6 +12,40 @@ const SET_NESTED = Symbol();
 const INTERMEDIATE_ACCESS = Symbol();
 const DATA_OBJ = Symbol();
 const SANITIZE_PATH = Symbol();
+const STRING_PATH_TO_ARRAY = Symbol();
+
+/**
+ * Verifies if a character is a decimal digit.
+ * @param {string} char
+ * @returns {boolean}
+ */
+function isDecimalDigit(char) {
+  const zero = '0'.charCodeAt(0);
+  const nine = '9'.charCodeAt(0);
+
+  let charCode = char.charCodeAt(0);
+
+  return charCode >= zero && charCode <= nine;
+}
+
+/**
+ * Verifies if a character is a quotation mark.
+ * @param {string} char
+ * @returns {boolean}
+ */
+function isQuotationMark(char) {
+  return char === "'" || char === '"';
+}
+
+/**
+ * Parses text as a decimal integer. Unlike parseInt with radix 10, this really
+ * only parses decimal integers. (0x0 is actually rejected)
+ * @param {string} text
+ * @returns {number}
+ */
+function parseDecimalInteger(text) {
+  return /^\d+$/.test(text) ? parseInt(text) : NaN;
+}
 
 class VueDataObjectPath {
   /**
@@ -124,7 +158,7 @@ class VueDataObjectPath {
   /**
    * Changes the contents of an array by removing or replacing existing elements
    * and/or adding new elements.
-   * @param {any[]} path - Path to an array.
+   * @param {string|any[]} path - Path to an array.
    * @param {number} start - The index at which to start changing the array.
    * @param {number=} deleteCount - An integer indicating the number of elements
    * in the array to remove from start. If omitted, all the elements from start
@@ -164,7 +198,7 @@ class VueDataObjectPath {
 
   /**
    * Inserts elements into an array.
-   * @param {any[]} path - Path to an array.
+   * @param {string|any[]} path - Path to an array.
    * @param {number} start - Where in the array to add elements.
    * @param {...any} items - The elements to add to the array.
    */
@@ -180,7 +214,7 @@ class VueDataObjectPath {
 
   /**
    * Removes elements from an array.
-   * @param {any[]} path - Path to an array.
+   * @param {string|any[]} path - Path to an array.
    * @param {number} start - Where in the array to add elements.
    * @param {number=} deleteCount - An integer indicating the number of elements
    * in the array to remove from start. If omitted, only one element is removed.
@@ -206,7 +240,7 @@ class VueDataObjectPath {
   /**
    * Adds one or more elements to the end of an array and returns the new length
    * of the array.
-   * @param {any[]} path - Path to an array.
+   * @param {string|any[]} path - Path to an array.
    * @param {...any=} items - The elements to add to the array.
    * @returns {number} Length of the array.
    */
@@ -234,7 +268,7 @@ class VueDataObjectPath {
 
   /**
    * Removes the last element from an array and returns that element.
-   * @param {any[]} path - Path to an array.
+   * @param {string|any[]} path - Path to an array.
    */
   pop(path) {
     path = this[SANITIZE_PATH](path);
@@ -260,7 +294,7 @@ class VueDataObjectPath {
 
   /**
    * Removes the first element from an array and returns that element.
-   * @param {any[]} path - Path to an array.
+   * @param {string|any[]} path - Path to an array.
    */
   shift(path) {
     path = this[SANITIZE_PATH](path);
@@ -294,7 +328,7 @@ class VueDataObjectPath {
    * - Undefined: does nothing
    *
    * Throws an error on any other type.
-   * @param {any[]} path - Path to an array.
+   * @param {string|any[]} path
    */
   empty(path) {
     path = this[SANITIZE_PATH](path);
@@ -322,19 +356,25 @@ class VueDataObjectPath {
   /**
    * Analyses path and returns a copy that can be trustworthy.
    * @throws {VueDataObjectPathError} - If path cannot be used.
-   * @param {string[]} path
+   * @param {string|any[]} path
    * @returns {string[]}
    */
   [SANITIZE_PATH](path) {
-    if (path.length === 0) {
-      throw new VueDataObjectPathError('Path must not be empty.');
-    }
+    if (path instanceof Array) {
+      if (path.length === 0) {
+        throw new VueDataObjectPathError('Path must not be empty.');
+      }
 
-    if (!(path instanceof Array)) {
-      throw new VueDataObjectPathError('Path must be an array.');
-    }
+      return path.concat();
+    } else if (typeof path === 'string') {
+      if (path.length === 0) {
+        throw new VueDataObjectPathError('Path must not be empty.');
+      }
 
-    return path.concat();
+      return this[STRING_PATH_TO_ARRAY](path);
+    } else {
+      throw new VueDataObjectPathError('Path must be an array or a string.');
+    }
   }
 
   /**
@@ -434,6 +474,56 @@ class VueDataObjectPath {
     }
 
     return this[VUE].$data;
+  }
+
+  /**
+   * Turns a string path into an array path.
+   * @param {string} path
+   * @returns {any[]}
+   */
+  [STRING_PATH_TO_ARRAY](path) {
+    let result = [];
+
+    let parts = path.split(/\.|\[/);
+
+    for (let part of parts) {
+      if (part.endsWith(']')) {
+        // This means that this was split on an opening square bracket.
+
+        let squareBracketContent = part.substring(0, part.length - 1);
+
+        if (isDecimalDigit(squareBracketContent[0])) {
+          let index = parseDecimalInteger(squareBracketContent);
+
+          if (Number.isNaN(index)) {
+            throw new VueDataObjectPathError('Invalid path.');
+          }
+
+          result.push(index);
+        } else if (isQuotationMark(squareBracketContent[0])) {
+          let openingMark = squareBracketContent[0];
+          let closingMark = squareBracketContent[squareBracketContent.length - 1];
+
+          if (openingMark !== closingMark) {
+            throw new VueDataObjectPathError('Invalid path.');
+          }
+
+          result.push(squareBracketContent.substring(1, squareBracketContent.length -1));
+        } else {
+          throw new VueDataObjectPathError('Invalid path.');
+        }
+      } else {
+        // Split on a dot.
+
+        if (isDecimalDigit(part[0])) {
+          throw new VueDataObjectPathError('Invalid path.');
+        }
+
+        result.push(part);
+      }
+    }
+
+    return result;
   }
 };
 
