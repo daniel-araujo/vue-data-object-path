@@ -179,6 +179,24 @@ class VueDataObjectPath {
   }
 
   /**
+   * Removes elements from an array.
+   * @param {any[]} path - Path to an array.
+   * @param {number} start - Where in the array to add elements.
+   * @param {number=} deleteCount - An integer indicating the number of elements
+   * in the array to remove from start. If omitted, only one element is removed.
+   * @returns {any[]} Array of removed elements.
+   */
+  remove(path, start, deleteCount = undefined) {
+    if (deleteCount === undefined) {
+      deleteCount = 1;
+    }
+
+    // The splice method pretty much does insertion but people get frightened of
+    // its power and versatility hence why this method exists.
+    return this.splice(path, start, deleteCount);
+  }
+
+  /**
    * Adds one or more elements to the end of an array and returns the new length
    * of the array.
    * @param {any[]} path - Path to an array.

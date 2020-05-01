@@ -681,7 +681,6 @@ describe('VueDataObjectPath', () => {
 
       vue.$objectPath.splice(['array'], 1);
 
-      // Making sure it did nothing.
       assert.strictEqual(vue.array.length, 1);
       assert.strictEqual(vue.array[0], 'one');
       assert.strictEqual(vue.array[1], undefined);
@@ -698,7 +697,6 @@ describe('VueDataObjectPath', () => {
 
       vue.$objectPath.splice(['array'], 1, undefined);
 
-      // Making sure it did nothing.
       assert.strictEqual(vue.array.length, 3);
       assert.strictEqual(vue.array[0], 'one');
       assert.strictEqual(vue.array[1], 'two');
@@ -852,6 +850,165 @@ describe('VueDataObjectPath', () => {
           });
 
         vue.$objectPath.insert(['array'], 1, 'oneAndAHalf');
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
+  });
+
+  describe('remove', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.remove(path, 0));
+
+    it('throws error when path leads to an object', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.remove(['nested'], 0);
+        },
+        {
+          message: 'Path does not lead to an array.'
+        });
+    });
+
+    it('throws error if array were to be created in root', () => {
+      let vue = new Vue({
+        data: {}
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.remove(['nested'], 0);
+        },
+        {
+          message: 'Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.'
+        });
+    });
+
+    it('creates array when path leads to undefined', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      vue.$objectPath.remove(['nested', 'doesNotExist'], 0);
+
+      assert(vue.nested.doesNotExist instanceof Array);
+    });
+
+    it('should only return empty array when path is undefined', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      let result = vue.$objectPath.splice(['nested', 'doesNotExist'], 0);
+
+      assert.strictEqual(result.length, 0);
+    });
+
+    it('removes only one element when deleteCount is omitted', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      vue.$objectPath.remove(['array'], 1);
+
+      assert.strictEqual(vue.array.length, 2);
+    });
+
+    it('shifts elements to take place of deleted element', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      vue.$objectPath.remove(['array'], 1);
+
+      assert.strictEqual(vue.array[0], 'one');
+      assert.strictEqual(vue.array[1], 'three');
+    });
+
+    it('assumes 1 when deleteCount is undefined', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      vue.$objectPath.remove(['array'], 1, undefined);
+
+      assert.strictEqual(vue.array.length, 2);
+    });
+
+    it('allows deleteCount to be 0', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      vue.$objectPath.remove(['array'], 0, 0);
+
+      assert.strictEqual(vue.array.length, 3);
+    });
+
+    it('returns empty array when no elements are deleted', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.remove(['array'], 0, 0);
+
+      assert(result instanceof Array);
+      assert.strictEqual(result.length, 0);
+    });
+
+    it('returns deleted elements', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.remove(['array'], 0);
+
+      assert(result instanceof Array);
+      assert.strictEqual(result.length, 1);
+    });
+
+    it('is reactive', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            array: ['one', 'two', 'three']
+          },
+        });
+
+        vue.$watch(
+          () => vue.array[0],
+          (newVal, oldVal) => {
+            if (newVal === 'two') {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.remove(['array'], 0);
 
         // This reject call will only work if resolve wasn't called.
         setImmediate(() => reject(new Error('Did not react')));
