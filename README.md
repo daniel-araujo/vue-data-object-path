@@ -1,27 +1,84 @@
 # vue-data-object-path
 
-This plugin allows you to retrieve and modify observable data properties using
-paths encoded as arrays.
+This Vue plugin allows you to retrieve and modify observable data properties
+using paths encoded as arrays. It creates intermediate objects and arrays for
+you. This turns out to be useful for very complex forms.
+
+Error handling example:
+
+```html
+<form>
+  <label>Name:</label>
+  <input :value.sync="fields.name">
+  <p>{{ $op.get(['errors', 'name']) }}</p>
+
+  <label>Attachments:</label>
+  <div v-for="(attachment, index) in fields.extra.attachments">
+    <file-upload :value="attachment"/>
+    <p>{{ $op.get(['errors', 'extra', 'attachments', index]) }}</p>
+  </div>
+</form>
+```
+
 
 ```js
-// From this.
+// Form data
 {
-  anObject: {}
+  fields: {
+    name: 'John Smith',
+    extra: {
+      attachments: [38475893405, 9895735794]
+    }
+  },
+  errors: {}
 }
+```
 
-$objectPath.set(['anObject', 'firstLayer', 'secondLayer'], 'value');
+```js
+// An attachment failed to pass a validation rule. An error message is set.
+$op.set(['errors', 'extra', 'attachments', 1], 'Incorrect file format.');
+```
 
-// To this.
+```js
+// Form data now
 {
-  anObject: {
-    firstlayer: {
-      secondLayer: 'value'
+  fields: {
+    name: 'John Smith',
+    extra: {
+      attachments: [38475893405, 9895735794]
+    }
+  },
+  errors: {
+    extra: {
+      attachments: [undefined, 'Incorrect file format.']
     }
   }
 }
 ```
 
-Tested against versions 2.0, 2.1, 2.2, 2.3, 2.4, 2.5 and 2.6.
+```js
+// User decides to remove attachment.
+$op.splice(['errors', 'extra', 'attachments'], 1, 1);
+
+// Error messages can be cleared.
+$op.empty(['errors']);
+```
+
+```js
+// Form data now
+{
+  form: {
+    name: 'John Smith',
+    extra: {
+      attachments: [38475893405]
+    }
+  },
+  errors: {}
+}
+```
+
+Tested against the latest versions of **2.0**, **2.1**, **2.2**, **2.3**,
+**2.4**, **2.5** and **2.6** of Vue.js.
 
 
 ## Install
