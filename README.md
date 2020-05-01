@@ -1,92 +1,33 @@
 # vue-data-object-path
 
-This Vue plugin allows you to retrieve and modify observable data properties
-using paths encoded as arrays. It creates intermediate objects and arrays for
-you. This turns out to be useful for very complex forms.
-
-Tested against the latest versions of **2.0**, **2.1**, **2.2**, **2.3**,
-**2.4**, **2.5** and **2.6** of Vue.js.
-
-
-## Example
-
-A form that contains fields for uploading attachments.
-
-```html
-<form>
-  <label>Name:</label>
-  <input :value.sync="fields.name">
-  <p>{{ $op.get(['errors', 'name']) }}</p>
-
-  <label>Attachments:</label> <button @click="addAttachment">+</button>
-  <div v-for="(attachmentId, index) in fields.extra.attachments">
-    <button @click="removeAttachment(index)">-</button
-    <file-viewer :value="attachmentId"/>
-    <p>{{ $op.get(['errors', 'extra', 'attachments', index]) }}</p>
-  </div>
-</form>
-```
-
-With this data.
+This Vue plugin allows you to retrieve and modify observable data properties in
+deeply nested structures using paths encoded in strings
+(`"form.attachments[1]"`) or arrays (`["form", "attachments", 1]`). Intermediate
+objects are automatically created for you.
 
 ```js
+$op.set('a.b.c.d.e.f', 'gun');
+
+// Creates this:
 {
-  fields: {
-    name: 'Montly Report 2017/01',
-    extra: {
-      attachments: [38475893405, 9895735794]
-    }
-  },
-  errors: {}
-}
-```
-
-Validation is done on the fields. An attachment fails to pass a validation
-rule. An error message is set.
-
-```js
-$op.set(['errors', 'extra', 'attachments', 1], 'Incorrect file format.');
-```
-
-The data structure looks like this now.
-
-```js
-{
-  fields: {
-    name: 'Montly Report 2017/01',
-    extra: {
-      attachments: [38475893405, 9895735794]
-    }
-  },
-  errors: {
-    extra: {
-      attachments: [undefined, 'Incorrect file format.']
+  a: {
+    b: {
+      c: {
+        d: {
+          e: {
+            f: 'gun'
+          }
+        }
+      }
     }
   }
 }
+
+$op.get('a.b.c.d.e.f'); // returns 'gun'.
 ```
 
-The user decides to remove the bad attachment. Error messages can be cleared.
-
-```js
-$op.remove(['fields', 'extra', 'attachments'], 1);
-
-$op.empty(['errors']);
-```
-
-The data structure ends up like this.
-
-```js
-{
-  form: {
-    name: 'Montly Report 2017/01',
-    extra: {
-      attachments: [38475893405]
-    }
-  },
-  errors: {}
-}
-```
+Tested with Vue.js **2.0**, **2.1**, **2.2**, **2.3**, **2.4**, **2.5** and
+**2.6**.
 
 
 ## Install
@@ -111,10 +52,25 @@ You will then have access to `$objectPath` and `$op` in every Vue component.
 
 ## Documentation
 
-The `$objectPath` property will be available on every Vue component. You can
-start using it after the data method runs.
+`$op` and its long version `$objectPath` are available in every Vue component.
+You can use them after the data method has run. They have the following methods:
 
-You can also use `$op` as a shortcut.
+
+| Method                                     | Short description                              |
+|--------------------------------------------|------------------------------------------------|
+| set(path)                                  | Stores a value                                 |
+| get(path)                                  | Retrieves a value                              |
+| insert(path, start, ...items)              | Inserts elements into array                    |
+| remove(path, start, deleteCount)           | Removes elements from array                    |
+| empty(path)                                | Empties objects and arrays                     |
+| delete(path)                               | Works like the delete operator                 |
+| push(path, ...value)                       | Inserts elements to the end of array           |
+| pop(path)                                  | Removes and returns last element of array      |
+| shift(path)                                | Removes and returns first element of array     |
+| splice(path, start, deleteCount, ...items) | Removes and inserts elements into array        |
+| coalesce(...path)                          | Returns first non-null and non-undefined value |
+
+For examples and more detailed descriptions, please read on.
 
 
 ### Methods
@@ -123,28 +79,44 @@ You can also use `$op` as a shortcut.
 
 Retrieves an object's property or an array's element.
 
+Returns undefined if path does not lead to a value.
+
 ```js
 {
   data() {
     return {
       a: {
-        b: 'd',
-        c: ['e', 'f', 'g'],
+        b: {
+          c: {
+            d: {
+              e: {
+                f: 'gun'
+              }
+            }
+          }
+        }
         'dot.dot': 'value'
+        array: ['first', 'second']
       }
     };
   }
 }
 
-// Retrieves the property of a nested object:
+// Retrieves value from nested property.
+$op.get('a.b.c.d.e.f'); // returns 'gun'.
+
+// Accesses a property using an array to prevent disambiguation.
 $op.get(['a', 'dot.dot']); // returns 'value'.
 
-// Retrieves an element of an array. Note that the index of the element must
-// be passed as a number.
-$op.get(['a', 'c', 1]); // returns 'f'.
+// Retrieves element of array.
+$op.get('a.array[1]'); // returns 'second'.
+
+// Accessing same element but with an array path. Note that the index
+// of the element must be passed as a number.
+$op.get(['a', 'array', '1']); // returns 'second'.
 
 // Does not crash if intermediate paths do not exist.
-$op.get(['a', 'doesNotExist', 'alsoDoeNotExist']); // returns undefined.
+$op.get('a.doesNotExist.alsoDoesNotExist'); // returns undefined.
 ```
 
 
@@ -154,7 +126,7 @@ Changes the value of a property of an object or the element of an array.
 
 If the property does not exist it will be created and it will be reactive.
 
-Intermediate paths that lead to no objects will automatically be created.
+Intermediate objects and arrays will automatically be created.
 
 ```js
 {
@@ -169,18 +141,18 @@ Intermediate paths that lead to no objects will automatically be created.
 }
 
 // Changes an existing property.
-$op.set(['a', 'b'], 'm'); // this.a.b is now 'm'.
+$op.set('a.b', 'm'); // this.a.b is now 'm'.
 
 // Changes the element of an array
-$op.set(['a', 'c', 1], 'm'); // this.a.c is now ['e', 'm', 'g']
+$op.set('a.c[1]', 'm'); // this.a.c is now ['e', 'm', 'g']
 
 // Will create intermediate objects and arrays depending on the type of the key. If
 // you pass a string, an object is created, if you pass a number an array is
 // created.
 $op.set(['a', 'd', 'c'], 'm'); // this.a.d.c is 'd'.
-                                       // this.a.d is { c: 'm' }.
+                               // this.a.d is { c: 'm' }.
 $op.set(['a', 'e', 1], 'm'); // this.a.e[1] is 'm'.
-                                     // this.a.e is [undefined, 'm'].
+                             // this.a.e is [undefined, 'm'].
 ```
 
 
@@ -204,13 +176,13 @@ Fails if the path leads to a value that is not an array.
 }
 
 // Inserting a single element.
-$op.insert(['a', 'b'], 1, 'd'); // this.a.b is now ['c', 'd', 'e', 'f']
+$op.insert('a.b', 1, 'd'); // this.a.b is now ['c', 'd', 'e', 'f']
 
 // Creating a new array and inserting an element.
-$op.insert(['a', 'c'], 0, 'd'); // this.a.c is now ['d']
+$op.insert('a.c', 0, 'd'); // this.a.c is now ['d']
 
 // Inserting multiple elements.
-$op.insert(['a', 'c'], 1, 'e', 'f'); // this.a.c is now ['d', 'e', 'f']
+$op.insert('a.c', 1, 'e', 'f'); // this.a.c is now ['d', 'e', 'f']
 ```
 
 
@@ -238,13 +210,13 @@ value that is not an array.
 }
 
 // Removes element at index 1
-$op.remove(['a', 'b'], 1); // this.a.b is now ['c', 'e', 'f', 'g']
+$op.remove('a.b', 1); // this.a.b is now ['c', 'e', 'f', 'g']
 
 // Removes 2 elements starting at index 1.
-$op.remove(['a', 'b'], 1, 2); // this.a.b is now ['c', 'g']
+$op.remove('a.b', 1, 2); // this.a.b is now ['c', 'g']
 
 // Does nothing when a path leads to no value.
-$op.remove(['a', 'c'], 1); // this.a.c is undefined
+$op.remove('a.c', 1); // this.a.c is undefined
 ```
 
 
@@ -264,8 +236,8 @@ Acts very much like the delete operator.
   }
 }
 
-$op.delete(['a', 'b']); // this.a.b is now undefined.
-$op.delete(['a', 'c', 1]); // this.a.c is now ['e', undefined, 'g'].
+$op.delete('a.b'); // this.a.b is now undefined.
+$op.delete('a.c[1]'); // this.a.c is now ['e', undefined, 'g'].
 ```
 
 
@@ -285,9 +257,9 @@ Empties objects, arrays and strings.
   }
 }
 
-$op.empty(['a', 'b']); // this.a.b is now ''.
-$op.empty(['a', 'c']); // this.a.c is now [].
-$op.empty(['a']); // this.a is now {}.
+$op.empty('a.b'); // this.a.b is now ''.
+$op.empty('a.c'); // this.a.c is now [].
+$op.empty('a'); // this.a is now {}.
 ```
 
 
@@ -306,10 +278,10 @@ Works just like JavaScript's push method. Only works on Arrays.
 
 // Pushes an element into an array. Note that push can also create
 // intermediate objects and arrays.
-$op.push(['a', 'b'], 'o'); // this.a.b is now ['o']
+$op.push('a.b', 'o'); // this.a.b is now ['o']
 
 // You can push multiple elements with a single function call.
-$op.push(['a', 'b'], 'p', 'q'); // this.a.b is now ['o', 'p', 'q']
+$op.push('a.b', 'p', 'q'); // this.a.b is now ['o', 'p', 'q']
 ```
 
 
@@ -329,7 +301,7 @@ Works just like JavaScript's pop method. Only works on Arrays.
 }
 
 // Removes the last element of the array.
-$op.pop(['a', 'b']); // Returns 'g' and this.a.b is now ['e', 'f'].
+$op.pop('a.b'); // Returns 'g' and this.a.b is now ['e', 'f'].
 ```
 
 
@@ -349,7 +321,7 @@ Works just like JavaScript's shift method. Only works on Arrays.
 }
 
 // Removes the first element of the array.
-$op.shift(['a', 'b']); // Returns 'e' and this.a.b is now ['f', 'g']
+$op.shift('a.b'); // Returns 'e' and this.a.b is now ['f', 'g']
 ```
 
 
@@ -369,13 +341,13 @@ Works just like JavaScript's splice method. Only works on Arrays.
 }
 
 // Removes 1 element from the array.
-$op.splice(['a', 'b'], 0, 1); // Returns ['e'] and this.a.b is now ['f', 'g']
+$op.splice('a.b', 0, 1); // Returns ['e'] and this.a.b is now ['f', 'g']
 
 // Removes 1 element and inserts 2 elements.
-$op.splice(['a', 'b'], 0, 1, 'h', 'i'); // Returns ['f'] and this.a.b is now ['h', 'i', 'g']
+$op.splice('a.b', 0, 1, 'h', 'i'); // Returns ['f'] and this.a.b is now ['h', 'i', 'g']
 
 // Removes all elements starting from the given index.
-$op.splice(['a', 'b'], 1); // Returns ['i', 'g'] and this.a.b is now ['h']
+$op.splice('a.b', 1); // Returns ['i', 'g'] and this.a.b is now ['h']
 ```
 
 
@@ -391,14 +363,15 @@ first non-undefined and non-null value.
       a: {
         b: undefined,
         c: null,
-        e: 'value'
+        e: 'first',
+        f: 'second'
       }
     };
   }
 }
 
 // Retrieves first non-undefined and non-null value.
-$op.coalesce(['a', 'b'], ['a', 'c'], ['a', 'd'], ['a', 'e']); // returns 'value'.
+$op.coalesce('a.b', 'a.c', 'a.d', 'a.e', 'a.f'); // returns 'first'.
 ```
 
 
@@ -411,19 +384,22 @@ limitation imposed by Vue.js
 {
   data() {
     return {
-      existingProperty: {
-        value: 1
+      existingProperty: 1,
+      object: {
+        property: 'value'
       }
     };
   }
 }
 
-// Not allowed. Throws error.
-$op.set(['newProperty'], 1);
+// Throws error. Not allowed to create properties at the root level.
+$op.set('newProperty', 'no');
 
-// Allowed.
-$op.set(['existingProperty', 'value'], 2);
-$op.set(['existingProperty', 'intermediateObject', 'value'], 3);
+// Allowed to change existing properties.
+$op.set('existingProperty', 2);
+
+// Allowed to create new nested properties.
+$op.set('object.newProperty', 'yes');
 ```
 
 

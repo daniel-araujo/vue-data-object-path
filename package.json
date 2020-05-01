@@ -1,7 +1,7 @@
 {
   "name": "vue-data-object-path",
   "version": "1.5.0",
-  "description": "This Vue plugin allows you to retrieve and modify observable data properties using paths encoded as arrays. It creates intermediate objects and arrays for you. This turns out to be useful for very complex forms.",
+  "description": "This Vue plugin allows you to retrieve and modify observable data properties in deeply nested structures using paths encoded in strings or arrays. It creates intermediate objects for you.",
   "main": "src/index.js",
   "scripts": {
     "test": "./test.sh"
