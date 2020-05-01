@@ -163,6 +163,22 @@ class VueDataObjectPath {
   }
 
   /**
+   * Inserts elements into an array.
+   * @param {any[]} path - Path to an array.
+   * @param {number} start - Where in the array to add elements.
+   * @param {...any} items - The elements to add to the array.
+   */
+  insert(path, start, ...items) {
+    if (items.length === 0) {
+      throw new VueDataObjectPathError('No items to insert.');
+    }
+
+    // The splice method pretty much does insertion but people get frightened of
+    // its power and versatility hence why this method exists.
+    this.splice(path, start, 0, ...items);
+  }
+
+  /**
    * Adds one or more elements to the end of an array and returns the new length
    * of the array.
    * @param {any[]} path - Path to an array.

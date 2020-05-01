@@ -758,6 +758,107 @@ describe('VueDataObjectPath', () => {
     });
   });
 
+  describe('insert', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.insert(path, 0, 'value'));
+
+    it('throws error when path leads to an object', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.insert(['nested'], 0, 'value');
+        },
+        {
+          message: 'Path does not lead to an array.'
+        });
+    });
+
+    it('throws error if array were to be created in root', () => {
+      let vue = new Vue({
+        data: {}
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.insert(['nested'], 0, 'value');
+        },
+        {
+          message: 'Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.'
+        });
+    });
+
+    it('creates array when path leads to undefined', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      vue.$objectPath.insert(['nested', 'doesNotExist'], 0, 'value');
+
+      assert(vue.nested.doesNotExist instanceof Array);
+    });
+
+    it('inserts elements when path is undefined', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      vue.$objectPath.insert(['nested', 'doesNotExist'], 0, 1, 2, 3);
+
+      assert.strictEqual(vue.nested.doesNotExist.length, 3);
+      assert.strictEqual(vue.nested.doesNotExist[0], 1);
+      assert.strictEqual(vue.nested.doesNotExist[1], 2);
+      assert.strictEqual(vue.nested.doesNotExist[2], 3);
+    });
+
+    it('fails when no items are provided', () => {
+      let vue = new Vue({
+        data: {
+          array: [1, 2]
+        }
+      });
+
+      assert.throws(
+        () => vue.$objectPath.insert(['array'], 0),
+        {
+          message: 'No items to insert.'
+        });
+    });
+
+    it('is reactive', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            array: ['one', 'two', 'three']
+          },
+        });
+
+        vue.$watch(
+          () => vue.array[1],
+          (newVal, oldVal) => {
+            if (newVal === 'oneAndAHalf') {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.insert(['array'], 1, 'oneAndAHalf');
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
+  });
+
   describe('push', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.push(path, 'value'));
 
