@@ -191,6 +191,13 @@ class VueDataObjectPath {
       deleteCount = 1;
     }
 
+    let value = this.get(path);
+
+    if (value === undefined) {
+      // Nothing to do.
+      return [];
+    }
+
     // The splice method pretty much does insertion but people get frightened of
     // its power and versatility hence why this method exists.
     return this.splice(path, start, deleteCount);

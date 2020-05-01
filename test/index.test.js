@@ -876,32 +876,6 @@ describe('VueDataObjectPath', () => {
         });
     });
 
-    it('throws error if array were to be created in root', () => {
-      let vue = new Vue({
-        data: {}
-      });
-
-      assert.throws(
-        () => {
-          vue.$objectPath.remove(['nested'], 0);
-        },
-        {
-          message: 'Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.'
-        });
-    });
-
-    it('creates array when path leads to undefined', () => {
-      let vue = new Vue({
-        data: {
-          nested: {}
-        }
-      });
-
-      vue.$objectPath.remove(['nested', 'doesNotExist'], 0);
-
-      assert(vue.nested.doesNotExist instanceof Array);
-    });
-
     it('should only return empty array when path is undefined', () => {
       let vue = new Vue({
         data: {
@@ -987,6 +961,23 @@ describe('VueDataObjectPath', () => {
 
       assert(result instanceof Array);
       assert.strictEqual(result.length, 1);
+    });
+
+    it('does not change path if path leads to no value', () => {
+      let vue = new Vue();
+
+      vue.$objectPath.remove(['array'], 0);
+
+      assert.strictEqual(vue.array, undefined);
+    });
+
+    it('returns empty array when path leads to no value', () => {
+      let vue = new Vue();
+
+      let result = vue.$objectPath.remove(['array'], 0);
+
+      assert(result instanceof Array);
+      assert.strictEqual(result.length, 0);
     });
 
     it('is reactive', async () => {
