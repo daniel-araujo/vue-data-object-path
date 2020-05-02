@@ -113,7 +113,7 @@ $op.get('a.array[1]'); // returns 'second'.
 
 // Accessing same element but with an array path. Note that the index
 // of the element must be passed as a number.
-$op.get(['a', 'array', '1']); // returns 'second'.
+$op.get(['a', 'array', 1]); // returns 'second'.
 
 // Does not crash if intermediate paths do not exist.
 $op.get('a.doesNotExist.alsoDoesNotExist'); // returns undefined.
