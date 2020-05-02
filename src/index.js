@@ -234,6 +234,7 @@ class VueDataObjectPath {
   /**
    * Removes the last element from an array and returns that element.
    * @param {string|any[]} path - Path to an array.
+   * @returns {any}
    */
   pop(path) {
     path = this[SANITIZE_PATH](path);
@@ -260,6 +261,7 @@ class VueDataObjectPath {
   /**
    * Removes the first element from an array and returns that element.
    * @param {string|any[]} path - Path to an array.
+   * @returns {any}
    */
   shift(path) {
     path = this[SANITIZE_PATH](path);
