@@ -1,3 +1,5 @@
+const { parseStringPath } = require('./string-path-parser');
+
 class VueDataObjectPathError extends Error {
   constructor(message) {
     super(message);
@@ -13,39 +15,6 @@ const INTERMEDIATE_ACCESS = Symbol();
 const DATA_OBJ = Symbol();
 const SANITIZE_PATH = Symbol();
 const STRING_PATH_TO_ARRAY = Symbol();
-
-/**
- * Verifies if a character is a decimal digit.
- * @param {string} char
- * @returns {boolean}
- */
-function isDecimalDigit(char) {
-  const zero = '0'.charCodeAt(0);
-  const nine = '9'.charCodeAt(0);
-
-  let charCode = char.charCodeAt(0);
-
-  return charCode >= zero && charCode <= nine;
-}
-
-/**
- * Verifies if a character is a quotation mark.
- * @param {string} char
- * @returns {boolean}
- */
-function isQuotationMark(char) {
-  return char === "'" || char === '"';
-}
-
-/**
- * Parses text as a decimal integer. Unlike parseInt with radix 10, this really
- * only parses decimal integers. (0x0 is actually rejected)
- * @param {string} text
- * @returns {number}
- */
-function parseDecimalInteger(text) {
-  return /^\d+$/.test(text) ? parseInt(text) : NaN;
-}
 
 class VueDataObjectPath {
   /**
@@ -482,48 +451,11 @@ class VueDataObjectPath {
    * @returns {any[]}
    */
   [STRING_PATH_TO_ARRAY](path) {
-    let result = [];
-
-    let parts = path.split(/\.|\[/);
-
-    for (let part of parts) {
-      if (part.endsWith(']')) {
-        // This means that this was split on an opening square bracket.
-
-        let squareBracketContent = part.substring(0, part.length - 1);
-
-        if (isDecimalDigit(squareBracketContent[0])) {
-          let index = parseDecimalInteger(squareBracketContent);
-
-          if (Number.isNaN(index)) {
-            throw new VueDataObjectPathError('Invalid path.');
-          }
-
-          result.push(index);
-        } else if (isQuotationMark(squareBracketContent[0])) {
-          let openingMark = squareBracketContent[0];
-          let closingMark = squareBracketContent[squareBracketContent.length - 1];
-
-          if (openingMark !== closingMark) {
-            throw new VueDataObjectPathError('Invalid path.');
-          }
-
-          result.push(squareBracketContent.substring(1, squareBracketContent.length -1));
-        } else {
-          throw new VueDataObjectPathError('Invalid path.');
-        }
-      } else {
-        // Split on a dot.
-
-        if (isDecimalDigit(part[0])) {
-          throw new VueDataObjectPathError('Invalid path.');
-        }
-
-        result.push(part);
-      }
+    try {
+      return parseStringPath(path);
+    } catch (e) {
+      throw new VueDataObjectPathError(e.message);
     }
-
-    return result;
   }
 };
 

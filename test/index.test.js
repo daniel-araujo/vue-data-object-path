@@ -98,6 +98,11 @@ describe('VueDataObjectPath', () => {
     // These tests will use the get method but the underlying implementation is
     // used in every method that takes a path.
 
+    // They are also very shallow because we have a dedicated test suite just
+    // for parsing the path.
+
+    // This is mostly just a sanity check.
+
     it('accesses root property', () => {
       let vue = new Vue({
         data: {
@@ -130,45 +135,7 @@ describe('VueDataObjectPath', () => {
       assert.strictEqual(vue.$objectPath.get('array[0]'), 'value');
     });
 
-    it('accesses the property of an object that is inside of an array', () => {
-      let vue = new Vue({
-        data: {
-          array: [
-            {
-              name: 'value'
-            }
-          ]
-        }
-      });
-
-      assert.strictEqual(vue.$objectPath.get('array[0].name'), 'value');
-    });
-
-    it('accesses the property of an object using square brackets with double quotes', () => {
-      let vue = new Vue({
-        data: {
-          nested: {
-            property: 'value',
-          }
-        }
-      });
-
-      assert.strictEqual(vue.$objectPath.get('nested["property"]'), 'value');
-    });
-
-    it('accesses the property of an object using square brackets with single quotes', () => {
-      let vue = new Vue({
-        data: {
-          nested: {
-            property: 'value',
-          }
-        }
-      });
-
-      assert.strictEqual(vue.$objectPath.get("nested['property']"), 'value');
-    });
-
-    it('throws error when using digits with dot notation', () => {
+    it('throws VueDataObjectPathError', () => {
       let vue = new Vue({
         data: {
           array: ['value']
@@ -178,35 +145,8 @@ describe('VueDataObjectPath', () => {
       assert.throws(
         () => vue.$objectPath.get('array.0'),
         {
-          message: 'Invalid path.'
-        });
-    });
-
-    it('throws error when non digit characters appear in brackets', () => {
-      let vue = new Vue({
-        data: {
-          array: ['value']
-        }
-      });
-
-      assert.throws(
-        () => vue.$objectPath.get('array[x]'),
-        {
-          message: 'Invalid path.'
-        });
-    });
-
-    it('throws when using hexadecimal notation in square brackets', () => {
-      let vue = new Vue({
-        data: {
-          array: ['value']
-        }
-      });
-
-      assert.throws(
-        () => vue.$objectPath.get('array[0x0]'),
-        {
-          message: 'Invalid path.'
+          name: 'VueDataObjectPathError',
+          message: 'Unexpected character.'
         });
     });
 
