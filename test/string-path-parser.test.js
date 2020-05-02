@@ -68,7 +68,7 @@ describe('StringPathParser', () => {
     assert.throws(
       () => parseStringPath('0root'),
       {
-        message: 'Unexpected character.'
+        message: 'Unexpected character. (near column 0)'
       });
   });
 
@@ -76,7 +76,7 @@ describe('StringPathParser', () => {
     assert.throws(
       () => parseStringPath('[0]'),
       {
-        message: 'Unexpected character.'
+        message: 'Unexpected character. (near column 0)'
       });
   });
 
@@ -84,7 +84,7 @@ describe('StringPathParser', () => {
     assert.throws(
       () => parseStringPath('root[figaro]'),
       {
-        message: 'Unexpected character.'
+        message: 'Unexpected character. (near column 4 up to 5)'
       });
   });
 
@@ -92,7 +92,7 @@ describe('StringPathParser', () => {
     assert.throws(
       () => parseStringPath('root[0'),
       {
-        message: 'Unexpected end of input.'
+        message: 'Unexpected end of input. (near column 4 up to 6)'
       });
   });
 
@@ -100,7 +100,7 @@ describe('StringPathParser', () => {
     assert.throws(
       () => parseStringPath('root['),
       {
-        message: 'Unexpected end of input.'
+        message: 'Unexpected end of input. (near column 4 up to 5)'
       });
   });
 
@@ -108,7 +108,7 @@ describe('StringPathParser', () => {
     assert.throws(
       () => parseStringPath('root.'),
       {
-        message: 'Unexpected end of input.'
+        message: 'Unexpected end of input. (near column 4 up to 5)'
       });
   });
 
@@ -116,7 +116,7 @@ describe('StringPathParser', () => {
     assert.throws(
       () => parseStringPath('root.0'),
       {
-        message: 'Unexpected character.'
+        message: 'Unexpected character. (near column 5)'
       });
   });
 });

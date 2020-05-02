@@ -145,8 +145,8 @@ describe('VueDataObjectPath', () => {
       assert.throws(
         () => vue.$objectPath.get('array.0'),
         {
-          name: 'VueDataObjectPathError',
-          message: 'Unexpected character.'
+          name: 'VueDataObjectPathSyntaxError',
+          message: 'Unexpected character. (near column 6)'
         });
     });
 

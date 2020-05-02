@@ -1,11 +1,8 @@
-const { parseStringPath } = require('./string-path-parser');
-
-class VueDataObjectPathError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'VueDataObjectPathError';
-  }
-}
+const {
+    parseStringPath,
+    VueDataObjectPathSyntaxError
+  } = require('./string-path-parser');
+const { VueDataObjectPathError } = require('./vue-data-object-path-error');
 
 // Symbols for private properties.
 const VUE = Symbol();
@@ -14,7 +11,6 @@ const SET_NESTED = Symbol();
 const INTERMEDIATE_ACCESS = Symbol();
 const DATA_OBJ = Symbol();
 const SANITIZE_PATH = Symbol();
-const STRING_PATH_TO_ARRAY = Symbol();
 
 class VueDataObjectPath {
   /**
@@ -340,7 +336,7 @@ class VueDataObjectPath {
         throw new VueDataObjectPathError('Path must not be empty.');
       }
 
-      return this[STRING_PATH_TO_ARRAY](path);
+      return parseStringPath(path);
     } else {
       throw new VueDataObjectPathError('Path must be an array or a string.');
     }
@@ -444,19 +440,6 @@ class VueDataObjectPath {
 
     return this[VUE].$data;
   }
-
-  /**
-   * Turns a string path into an array path.
-   * @param {string} path
-   * @returns {any[]}
-   */
-  [STRING_PATH_TO_ARRAY](path) {
-    try {
-      return parseStringPath(path);
-    } catch (e) {
-      throw new VueDataObjectPathError(e.message);
-    }
-  }
 };
 
 VueDataObjectPath.install = function (Vue) {
@@ -474,3 +457,7 @@ VueDataObjectPath.install = function (Vue) {
 };
 
 module.exports = VueDataObjectPath;
+
+module.exports.VueDataObjectPathError = VueDataObjectPathError;
+
+module.exports.VueDataObjectPathSyntaxError = VueDataObjectPathSyntaxError;

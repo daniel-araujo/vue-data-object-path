@@ -1,3 +1,16 @@
+const { VueDataObjectPathError } = require('./vue-data-object-path-error');
+
+class VueDataObjectPathSyntaxError extends VueDataObjectPathError {
+  constructor(message) {
+    super(message);
+    this.name = 'VueDataObjectPathSyntaxError';
+
+    // The setLocation method defines these values.
+    this.from = null;
+    this.to = null;
+  }
+}
+
 /**
  * Represents parsing state.
  */
@@ -18,18 +31,19 @@ class State {
 
   /**
    * Returns a character relative to the current position.
-   * @param {number=} n
+   * @param {number=} n - Offset. Defaults to 0.
    */
   at(n = 0) {
     return this.s[this.pos + n];
   }
 
   /**
-   * Moves n many characters.
-   * @returns {number}
+   * Moves n many characters. Only lets you move one past the end.
+   * @param {number=} n - How many positions to move. You can pass negative
+   * values to backtrack. Defaults to 1.
    */
   move(n = 1) {
-    this.pos += n;
+    this.pos = Math.min(this.pos + n, this.s.length);
   }
 
   /**
@@ -45,25 +59,32 @@ class State {
    * @returns {boolean}
    */
   end() {
-    return this.pos >= this.s.length;
+    return this.pos === this.s.length;
   }
 
   /**
    * Creates snapshot of current state.
-   * @returns {object}
+   * @returns {StateSnapshot}
    */
   save() {
-    return {
-      pos: this.pos
-    };
+    return new StateSnapshot(this);
   }
 
   /**
    * Loads state from snapshot.
-   * @param {object} snapshot
+   * @param {StateSnapshot} snapshot
    */
   load(snapshot) {
     this.pos = snapshot.pos
+  }
+}
+
+/**
+ * A save point.
+ */
+class StateSnapshot {
+  constructor(state) {
+    this.pos = state.pos;
   }
 }
 
@@ -110,7 +131,7 @@ function isEnglishLetter(char) {
 function unicodeEscape(state) {
   if (state.left() < 4) {
     // JavaScript throws this error too.
-    throw new SyntaxError('Invalid Unicode escape sequence');
+    throw new VueDataObjectPathSyntaxError('Invalid Unicode escape sequence');
   }
 
   let uffff = 0;
@@ -120,7 +141,7 @@ function unicodeEscape(state) {
 
     if (!Number.isFinite(hex)) {
       // JavaScript throws this error too.
-      throw new SyntaxError('Invalid Unicode escape sequence');
+      throw new VueDataObjectPathSyntaxError('Invalid Unicode escape sequence');
     }
 
     uffff = uffff * 16 + hex;
@@ -185,8 +206,35 @@ function makeStringGrammar(delimiter, escape, esc) {
     }
 
     // JavaScript throws this error too.
-    throw new SyntaxError('Invalid or unexpected token.');
+    throw new VueDataObjectPathSyntaxError('Invalid or unexpected token.');
   }
+}
+
+/**
+ * Sets parse error location.
+ * @param {Error} error
+ * @param {number} from
+ * @param {number} to
+ */
+function setLocation(error, from, to) {
+  if (!(error instanceof VueDataObjectPathSyntaxError)) {
+    return;
+  }
+
+  if (error.from !== null) {
+    return;
+  }
+
+  error.from = from;
+  error.to = to;
+
+  let lineInfo = `near column ${from}`;
+
+  if (to !== from) {
+    lineInfo += ` up to ${to}`;
+  }
+
+  error.message = `${error.message} (${lineInfo})`;
 }
 
 const parser = {
@@ -211,7 +259,7 @@ const parser = {
   /**
    * Tries to parse a list of grammars. When one fails, tries next. Throws error
    * when last one fails.
-   * @throws SyntaxError
+   * @throws {VueDataObjectPathSyntaxError}
    * @param {State} state
    * @param {...string} names
    */
@@ -223,6 +271,7 @@ const parser = {
       try {
         return grammar[name].call(this, state);
       } catch (e) {
+        setLocation(e, snapshot.pos, state.pos);
         lastError = e;
         state.load(snapshot);
       }
@@ -266,32 +315,36 @@ const grammar = {
       state.move();
 
       if (state.end()) {
-        throw new SyntaxError('Unexpected end of input.');
+        throw new VueDataObjectPathSyntaxError('Unexpected end of input.');
       }
 
       return this.require(state, 'word')
     } else {
-      throw new SyntaxError('Unexpected character.');
+      throw new VueDataObjectPathSyntaxError('Unexpected character.');
     }
   },
 
   accessPropertyBracketNotation(state) {
     if (state.at() === '[') {
+      if (state.end()) {
+        throw new VueDataObjectPathSyntaxError('Unexpected end of input.');
+      }
+
       state.move();
       let result = this.try(state, 'number', 'stringSingle', 'stringDouble');
 
       if (state.end()) {
-        throw new SyntaxError('Unexpected end of input.');
+        throw new VueDataObjectPathSyntaxError('Unexpected end of input.');
       }
 
       if (state.at() === ']') {
         state.move();
         return result;
       } else {
-        throw new SyntaxError('Unexpected character.');
+        throw new VueDataObjectPathSyntaxError('Unexpected character.');
       }
     } else {
-      throw new SyntaxError('Unexpected character.');
+      throw new VueDataObjectPathSyntaxError('Unexpected character.');
     }
   },
 
@@ -305,7 +358,7 @@ const grammar = {
       result += first;
       state.move();
     } else {
-      throw new SyntaxError('Unexpected character.');
+      throw new VueDataObjectPathSyntaxError('Unexpected character.');
     }
 
     while (!state.end()) {
@@ -331,7 +384,7 @@ const grammar = {
       result += first;
       state.move();
     } else {
-      throw new SyntaxError('Unexpected character.');
+      throw new VueDataObjectPathSyntaxError('Unexpected character.');
     }
   
     while (!state.end()) {
@@ -376,3 +429,5 @@ const grammar = {
 exports.parseStringPath = function (path) {
   return parser.require(new State(path), 'path');
 };
+
+exports.VueDataObjectPathSyntaxError = VueDataObjectPathSyntaxError;
