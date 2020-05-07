@@ -1,6 +1,6 @@
 {
   "name": "vue-data-object-path",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "This Vue plugin allows you to retrieve and modify observable data properties in deeply nested structures using paths encoded in strings or arrays. It creates intermediate objects for you.",
   "main": "src/index.js",
   "scripts": {
