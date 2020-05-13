@@ -60,6 +60,7 @@ You can use them after the data method has run. They have the following methods:
 |--------------------------------------------|------------------------------------------------|
 | set(path)                                  | Stores a value                                 |
 | get(path)                                  | Retrieves a value                              |
+| has(path)                                  | Checks if value exists                         |
 | insert(path, start, ...items)              | Inserts elements into array                    |
 | remove(path, start, deleteCount)           | Removes elements from array                    |
 | empty(path)                                | Empties objects and arrays                     |
@@ -153,6 +154,38 @@ $op.set(['a', 'd', 'c'], 'm'); // this.a.d.c is 'd'.
                                // this.a.d is { c: 'm' }.
 $op.set(['a', 'e', 1], 'm'); // this.a.e[1] is 'm'.
                              // this.a.e is [undefined, 'm'].
+```
+
+
+#### `has(path)`
+
+Checks if path leads to a meaningful value.
+
+Null and undefined are values that are not considered meaningful.
+
+```js
+{
+  data() {
+    return {
+      a: {
+        b: 'd',
+        c: ['e', 'f', 'g'],
+        d: undefined,
+        e: null
+      }
+    };
+  }
+}
+
+$op.has('a'); // returns true.
+$op.has('a.b'); // returns true.
+$op.has('a.b.c[0]'); // returns true.
+
+$op.has('b'); // returns false.
+$op.has('a.c'); // returns false.
+$op.has('a.b.c[3]'); // returns false.
+$op.has('a.b.d'); // returns false.
+$op.has('a.b.e'); // returns false.
 ```
 
 

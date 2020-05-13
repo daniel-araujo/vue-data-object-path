@@ -286,6 +286,76 @@ describe('VueDataObjectPath', () => {
     });
   });
 
+
+
+  describe('has', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.has(path));
+
+    it('does not return false when value is falsy', () => {
+      let vue = new Vue({
+        data: {
+          booleanFalse: false,
+          stringEmpty: '',
+          numberZero: 0,
+          numberNegativeZero: -0,
+          nan: NaN,
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.has(['nan']), true);
+      assert.strictEqual(vue.$objectPath.has(['numberNegativeZero']), true);
+      assert.strictEqual(vue.$objectPath.has(['numberZero']), true);
+      assert.strictEqual(vue.$objectPath.has(['stringEmpty']), true);
+      assert.strictEqual(vue.$objectPath.has(['booleanFalse']), true);
+    });
+
+    it('returns false when value is null', () => {
+      let vue = new Vue({
+        data: {
+          null: null,
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.has(['null']), false);
+    });
+
+    it('returns false when value is undefined', () => {
+      let vue = new Vue({
+        data: {
+          undefined: undefined,
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.has(['undefined']), false);
+    });
+
+    it('returns true when path leads to a value', () => {
+      let vue = new Vue({
+        data: {
+          a: 'value',
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.has(['a']), true);
+    });
+
+    it('returns false when path leads to no value', () => {
+      let vue = new Vue();
+
+      assert.strictEqual(vue.$objectPath.has(['doesNotExist']), false);
+    });
+
+    it('returns false even when path leads halfway to a value', () => {
+      let vue = new Vue({
+        nested: {
+          empty: {}
+        }
+      });
+
+      assert.strictEqual(vue.$objectPath.has(['nested', 'empty', 'object']), false);
+    });
+  });
+
   describe('coalesce', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.coalesce(path));
 

@@ -46,6 +46,17 @@ exports.VueDataObjectPath = class VueDataObjectPath {
   }
 
   /**
+   * Checks if path leads to a meaninful value.
+   * Null and undefined are not considered to be meaningful.
+   * @param {any[]} path
+   * @returns {boolean}
+   */
+  has(path) {
+    let value = this.get(path);
+    return value !== null && value !== undefined;
+  }
+
+  /**
    * Inspired by the COALESCE function present in SQL based databases. Retrieves
    * the first non-undefined and non-null value.
    * @param {...any} path
