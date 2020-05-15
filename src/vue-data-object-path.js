@@ -24,7 +24,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
 
   /**
    * Retrieves a value.
-   * @param {any[]} path
+   * @param {string|any[]} path
    * @returns {any}
    */
   get(path) {
@@ -48,7 +48,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
   /**
    * Checks if path leads to a meaninful value.
    * Null and undefined are not considered to be meaningful.
-   * @param {any[]} path
+   * @param {string|any[]} path
    * @returns {boolean}
    */
   has(path) {
@@ -59,7 +59,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
   /**
    * Inspired by the COALESCE function present in SQL based databases. Retrieves
    * the first non-undefined and non-null value.
-   * @param {...any} path
+   * @param {...any} paths
    * @returns {any}
    */
   coalesce(...paths) {
@@ -78,7 +78,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
   /**
    * Defines a value. Intermediate objects and arrays are created. If the key is
    * a number then an array is created, otherwise an object is.
-   * @param {any[]} path
+   * @param {string|any[]} path
    * @param {any} value
    */
   set(path, value) {
@@ -95,7 +95,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
    * Deletes a value.
    * Note that this behaves like the delete operator. This means that arrays
    * are not resized. Use the splice method if you need that behavior.
-   * @param {any[]} path
+   * @param {string|any[]} path
    */
   delete(path) {
     path = this[SANITIZE_PATH](path);
@@ -354,6 +354,8 @@ exports.VueDataObjectPath = class VueDataObjectPath {
 
   /**
    * For setting properties on the root level.
+   * @param {string|any[]} path
+   * @param {any} value
    */
   [SET_ROOT](path, value) {
     let key = path[0];
@@ -368,6 +370,8 @@ exports.VueDataObjectPath = class VueDataObjectPath {
 
   /**
    * For setting properties in deeper levels.
+   * @param {string|any[]} path
+   * @param {any} value
    */
   [SET_NESTED](path, value) {
     let current = this[DATA_OBJ]();
@@ -410,7 +414,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
 
   /**
    * Creates intermediate object or array if necessary.
-   * @param {object|array} current
+   * @param {object|any[]} current
    * @param {string|number} key
    * @param {string|number} nextKey
    */
