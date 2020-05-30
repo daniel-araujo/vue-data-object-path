@@ -286,8 +286,6 @@ describe('VueDataObjectPath', () => {
     });
   });
 
-
-
   describe('has', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.has(path));
 
@@ -357,7 +355,7 @@ describe('VueDataObjectPath', () => {
       assert.strictEqual(vue.$objectPath.has(['nested', 'empty', 'object']), false);
     });
 
-    it('is reactive', () => {
+    it('is reactive with existing value', () => {
       let called = 0;
 
       let vue = new Vue({
@@ -378,6 +376,54 @@ describe('VueDataObjectPath', () => {
       vue.value = 1;
 
       assert.strictEqual(vue.has, true);
+      assert.strictEqual(called, 2);
+    });
+
+    it('is reactive after last property is created', () => {
+      let called = 0;
+
+      let vue = new Vue({
+        data: {
+          nested: {},
+        },
+
+        computed: {
+          has() {
+            called += 1;
+            return this.$objectPath.has(['nested', 'value']);
+          }
+        }
+      });
+
+      assert.strictEqual(vue.has, false);
+
+      vue.$objectPath.set(['nested', 'value'], 1);
+
+      assert.strictEqual(vue.has, true);
+      assert.strictEqual(called, 2);
+    });
+
+    it('is reactive after intermediate property is created', () => {
+      let called = 0;
+
+      let vue = new Vue({
+        data: {
+          nested: {},
+        },
+
+        computed: {
+          has() {
+            called += 1;
+            return this.$objectPath.has(['nested', 'intermediate', 'value']);
+          }
+        }
+      });
+
+      assert.strictEqual(vue.has, false);
+
+      vue.$objectPath.set(['nested', 'intermediate'], {});
+
+      assert.strictEqual(vue.has, false);
       assert.strictEqual(called, 2);
     });
   });
