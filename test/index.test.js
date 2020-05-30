@@ -347,8 +347,10 @@ describe('VueDataObjectPath', () => {
 
     it('returns false even when path leads halfway to a value', () => {
       let vue = new Vue({
-        nested: {
-          empty: {}
+        data: {
+          nested: {
+            empty: {}
+          }
         }
       });
 
