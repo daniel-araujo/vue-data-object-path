@@ -356,6 +356,30 @@ describe('VueDataObjectPath', () => {
 
       assert.strictEqual(vue.$objectPath.has(['nested', 'empty', 'object']), false);
     });
+
+    it('is reactive', () => {
+      let called = 0;
+
+      let vue = new Vue({
+        data: {
+          value: null,
+        },
+
+        computed: {
+          has() {
+            called += 1;
+            return this.$objectPath.has(['value']);
+          }
+        }
+      });
+
+      assert.strictEqual(vue.has, false);
+
+      vue.value = 1;
+
+      assert.strictEqual(vue.has, true);
+      assert.strictEqual(called, 2);
+    });
   });
 
   describe('coalesce', () => {
