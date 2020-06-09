@@ -217,6 +217,54 @@ describe('VueDataObjectPath', () => {
 
         assert.strictEqual(value, undefined);
       });
+
+      it('is reactive by simple assignment', () => {
+        let called = 0;
+
+        let vue = new Vue({
+          data: {
+            first: 'before',
+          },
+
+          computed: {
+            get() {
+              called += 1;
+              return this.$objectPath.get(['first']);
+            }
+          }
+        });
+
+        assert.strictEqual(vue.get, 'before');
+
+        vue.first = 'after';
+
+        assert.strictEqual(vue.get, 'after');
+        assert.strictEqual(called, 2);
+      });
+
+      it('is reactive by assignment with $objectPath.set', () => {
+        let called = 0;
+
+        let vue = new Vue({
+          data: {
+            first: null
+          },
+
+          computed: {
+            get() {
+              called += 1;
+              return this.$objectPath.get(['first']);
+            }
+          }
+        });
+
+        assert.strictEqual(vue.get, null);
+
+        vue.$objectPath.set(['first'], 'after');
+
+        assert.strictEqual(vue.get, 'after');
+        assert.strictEqual(called, 2);
+      });
     });
 
     describe('nested object', () => {
@@ -257,6 +305,82 @@ describe('VueDataObjectPath', () => {
 
         assert.strictEqual(value, undefined);
       });
+
+      it('is reactive by simple assignment', () => {
+        let called = 0;
+
+        let vue = new Vue({
+          data: {
+            first: {
+              second: 'before',
+            }
+          },
+
+          computed: {
+            get() {
+              called += 1;
+              return this.$objectPath.get(['first', 'second']);
+            }
+          }
+        });
+
+        assert.strictEqual(vue.get, 'before');
+
+        vue.first.second = 'after';
+
+        assert.strictEqual(vue.get, 'after');
+        assert.strictEqual(called, 2);
+      });
+
+      it('is reactive by assignment with $objectPath.set', () => {
+        let called = 0;
+
+        let vue = new Vue({
+          data: {
+            nested: {
+              prop: null
+            }
+          },
+
+          computed: {
+            get() {
+              called += 1;
+              return this.$objectPath.get(['nested', 'prop']);
+            }
+          }
+        });
+
+        assert.strictEqual(vue.get, null);
+
+        vue.$objectPath.set(['nested', 'prop'], 'after');
+
+        assert.strictEqual(vue.get, 'after');
+        assert.strictEqual(called, 2);
+      });
+
+      it('is reactive after creating object', () => {
+        let called = 0;
+
+        let vue = new Vue({
+          data: {
+            nested: {},
+          },
+
+          computed: {
+            get() {
+              called += 1;
+              return this.$objectPath.get(['nested', 'object', 'prop']);
+            }
+          }
+        });
+
+        assert.strictEqual(vue.get, undefined);
+
+        vue.$objectPath.set(['nested', 'object', 'prop'], 'after');
+
+        assert.strictEqual(vue.get, 'after');
+        assert.strictEqual(called, 2);
+      });
     });
 
     describe('nested array', () => {
@@ -282,6 +406,78 @@ describe('VueDataObjectPath', () => {
         let value = vue.$objectPath.get(['first', 1]);
 
         assert.strictEqual(value, undefined);
+      });
+
+      it('is not reactive by simple assignment', () => {
+        let called = 0;
+
+        let vue = new Vue({
+          data: {
+            first: ['before'],
+          },
+
+          computed: {
+            get() {
+              called += 1;
+              return this.$objectPath.get(['first', 0]);
+            }
+          }
+        });
+
+        assert.strictEqual(vue.get, 'before');
+
+        vue.first[0] = 'after';
+
+        assert.strictEqual(vue.get, 'before');
+        assert.strictEqual(called, 1);
+      });
+
+      it('is reactive by assignment with $objectPath.set', () => {
+        let called = 0;
+
+        let vue = new Vue({
+          data: {
+            first: ['before'],
+          },
+
+          computed: {
+            get() {
+              called += 1;
+              return this.$objectPath.get(['first', 0]);
+            }
+          }
+        });
+
+        assert.strictEqual(vue.get, 'before');
+
+        vue.$objectPath.set(['first', 0], 'after');
+
+        assert.strictEqual(vue.get, 'after');
+        assert.strictEqual(called, 2);
+      });
+
+      it('is reactive after creating array', () => {
+        let called = 0;
+
+        let vue = new Vue({
+          data: {
+            nested: {},
+          },
+
+          computed: {
+            get() {
+              called += 1;
+              return this.$objectPath.get(['nested', 'array', 0]);
+            }
+          }
+        });
+
+        assert.strictEqual(vue.get, undefined);
+
+        vue.$objectPath.set(['nested', 'array', 0], 'after');
+
+        assert.strictEqual(vue.get, 'after');
+        assert.strictEqual(called, 2);
       });
     });
   });
