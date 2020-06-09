@@ -59,7 +59,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
   /**
    * Inspired by the COALESCE function present in SQL based databases. Retrieves
    * the first non-undefined and non-null value.
-   * @param {...any} paths
+   * @param {...string|any[]} paths
    * @returns {any}
    */
   coalesce(...paths) {
