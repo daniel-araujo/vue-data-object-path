@@ -26,8 +26,8 @@ $op.set('a.b.c.d.e.f', 'gun');
 $op.get('a.b.c.d.e.f'); // returns 'gun'.
 ```
 
-Tested with Vue.js **2.0**, **2.1**, **2.2**, **2.3**, **2.4**, **2.5** and
-**2.6**.
+Tested with the latest release of every minor version of Vue.js 2 (from **2.0**
+to **2.6**).
 
 
 ## Install
