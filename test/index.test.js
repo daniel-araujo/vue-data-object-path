@@ -167,7 +167,7 @@ describe('VueDataObjectPath', () => {
 
   describe('get', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.get(path));
-  
+
     it('does not mistake falsy values for undefined', () => {
       // This bug actually exists in versions prior to 1.4. That's the
       // punishment I get for saving a couple of key strokes.
@@ -855,9 +855,9 @@ describe('VueDataObjectPath', () => {
             }
           }
         });
-  
+
         vue.$objectPath.set(['first', 'name'], 'newvalue');
-  
+
         assert.strictEqual(vue.first.name, 'newvalue');
       });
 
@@ -867,21 +867,21 @@ describe('VueDataObjectPath', () => {
             first: {}
           }
         });
-  
+
         vue.$objectPath.set(['first', 'name'], 'value');
-  
+
         assert.strictEqual(vue.first.name, 'value');
       });
-  
+
       it('creates nested objected when setting property of nested object', () => {
         let vue = new Vue({
           data: {
             first: {}
           }
         });
-  
+
         vue.$objectPath.set(['first', 'name', 'name2'], 'value');
-  
+
         assert.notEqual(vue.first, undefined);
         assert.strictEqual(vue.first.name.name2, 'value');
       });
