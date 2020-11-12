@@ -1742,6 +1742,136 @@ describe('VueDataObjectPath', () => {
     });
   });
 
+  describe('unshift', () => {
+    createTestsForInvalidPaths((vue, path) => vue.$objectPath.unshift(path, 'value'));
+
+    it('throws error when path leads to an object', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.unshift(['nested'], 0);
+        },
+        {
+          message: 'Path does not lead to an array.'
+        });
+    });
+
+    it('creates array when path leads to undefined', () => {
+      let vue = new Vue({
+        data: {
+          nested: {}
+        }
+      });
+
+      vue.$objectPath.unshift(['nested', 'doesNotExist'], 0);
+
+      assert(vue.nested.doesNotExist instanceof Array, 'Should create array');
+      assert.strictEqual(vue.nested.doesNotExist.length, 1, 'Should add element to array');
+      assert.strictEqual(vue.nested.doesNotExist[0], 0, 'Should have correct element');
+    });
+
+    it('throws error if array were to be created in root', () => {
+      let vue = new Vue({
+        data: {}
+      });
+
+      assert.throws(
+        () => {
+          vue.$objectPath.unshift(['doesNotExist'], 0);
+        },
+        {
+          message: 'Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.'
+        });
+    });
+
+    it('returns new length', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.unshift(['array'], 'four');
+
+      assert.strictEqual(result, 4);
+    });
+
+    it('returns correct length when adding more than one item', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      let result = vue.$objectPath.unshift(['array'], 'four', 'five', 'six');
+
+      assert.strictEqual(result, 6);
+    });
+
+    it('inserts element to beginning of array', () => {
+      let vue = new Vue({
+        data: {
+          array: ['one', 'two', 'three']
+        }
+      });
+
+      vue.$objectPath.unshift(['array'], 'zero');
+
+      assert.strictEqual(vue.array.length, 4);
+      assert.strictEqual(vue.array[0], 'zero');
+      assert.strictEqual(vue.array[1], 'one');
+      assert.strictEqual(vue.array[2], 'two');
+      assert.strictEqual(vue.array[3], 'three');
+    });
+
+    it('inserts elements to beginning of array in order they were passed', () => {
+      let vue = new Vue({
+        data: {
+          array: ['two', 'three']
+        }
+      });
+
+      vue.$objectPath.unshift(['array'], 'zero', 'one');
+
+      assert.strictEqual(vue.array.length, 4);
+      assert.strictEqual(vue.array[0], 'zero');
+      assert.strictEqual(vue.array[1], 'one');
+      assert.strictEqual(vue.array[2], 'two');
+      assert.strictEqual(vue.array[3], 'three');
+    });
+
+    it('is reactive', async () => {
+      await new Promise((resolve, reject) => {
+        let vue = new Vue({
+          data: {
+            array: ['one', 'two', 'three']
+          },
+        });
+
+        vue.$watch(
+          () => vue.array[0],
+          (newVal, oldVal) => {
+            if (newVal === 'four') {
+              // As expected.
+              resolve();
+            } else {
+              reject(new Error('Reacted but the new value is incorrect.'));
+            }
+          });
+
+        vue.$objectPath.unshift(['array'], 'four');
+
+        // This reject call will only work if resolve wasn't called.
+        setImmediate(() => reject(new Error('Did not react')));
+      });
+    });
+  });
+
   describe('empty', () => {
     createTestsForInvalidPaths((vue, path) => vue.$objectPath.empty(path));
 

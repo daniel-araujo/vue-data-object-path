@@ -68,6 +68,7 @@ You can use them after the data method has run. They have the following methods:
 | push(path, ...value)                       | Inserts elements to the end of array           |
 | pop(path)                                  | Removes and returns last element of array      |
 | shift(path)                                | Removes and returns first element of array     |
+| unshift(path, ...value)                    | Inserts elements to the beginning of array     |
 | splice(path, start, deleteCount, ...items) | Removes and inserts elements into array        |
 | coalesce(...path)                          | Returns first non-null and non-undefined value |
 
@@ -355,6 +356,28 @@ Works just like JavaScript's shift method. Only works on Arrays.
 
 // Removes the first element of the array.
 $op.shift('a.b'); // Returns 'e' and this.a.b is now ['f', 'g']
+```
+
+
+#### `unshift(path, ...value)`
+
+Works just like JavaScript's unshift method. Only works on Arrays.
+
+```js
+{
+  data() {
+    return {
+      a: {}
+    };
+  }
+}
+
+// Adds an element to the beginning. Note that unshift can also create
+// intermediate objects and arrays.
+$op.push('a.b', 'o'); // this.a.b is now ['o']
+
+// You can add multiple elements with a single function call.
+$op.push('a.b', 'p', 'q'); // this.a.b is now ['p', 'q', 'o']
 ```
 
 

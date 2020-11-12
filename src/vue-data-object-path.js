@@ -294,6 +294,35 @@ exports.VueDataObjectPath = class VueDataObjectPath {
   }
 
   /**
+   * Adds one or more elements to the beginning of an array and returns the new
+   * length of the array.
+   * @param {string|any[]} path - Path to an array.
+   * @param {...any=} items - The elements to add to the array.
+   * @returns {number} Length of the array.
+   */
+  unshift(path, ...items) {
+    path = this[SANITIZE_PATH](path);
+
+    let container = this.get(path);
+
+    if (container === undefined) {
+      if (path.length === 1) {
+        throw new VueDataObjectPathError('Vue does not support dynamic properties at the root level. Either explicitly declare the property or use a nested object.');
+      }
+
+      // Will create.
+      this.set(path, []);
+      container = this.get(path);
+    }
+
+    if (!(container instanceof Array)) {
+      throw new VueDataObjectPathError('Path does not lead to an array.');
+    }
+
+    return container.unshift(...items);
+  }
+
+  /**
    * Empties the value at the given path. The behavior of this function depends
    * on the type of the value:
    *
