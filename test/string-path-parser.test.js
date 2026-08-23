@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { parseStringPath } = require('../src/string-path-parser');
+const { parseStringPath, VueDataObjectPathSyntaxError } = require('../src/string-path-parser');
 
 describe('StringPathParser', () => {
   it('parses root access', () => {
@@ -117,6 +117,15 @@ describe('StringPathParser', () => {
       () => parseStringPath('root.0'),
       {
         message: 'Unexpected character. (near column 5)'
+      });
+  });
+
+  it('fails with a syntax error if input is empty', () => {
+    assert.throws(
+      () => parseStringPath(''),
+      {
+        constructor: VueDataObjectPathSyntaxError,
+        message: 'Unexpected end of input. (near column 0)'
       });
   });
 });

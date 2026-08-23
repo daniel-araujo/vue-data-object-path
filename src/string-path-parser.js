@@ -351,6 +351,10 @@ const grammar = {
   word(state) {
     let result = '';
 
+    if (state.end()) {
+      throw new VueDataObjectPathSyntaxError('Unexpected end of input.');
+    }
+
     let first = state.at();
 
     // First character is a special case.
@@ -377,6 +381,10 @@ const grammar = {
 
   number(state) {
     let result = '';
+
+    if (state.end()) {
+      throw new VueDataObjectPathSyntaxError('Unexpected end of input.');
+    }
 
     let first = state.at();
 
