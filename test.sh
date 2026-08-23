@@ -13,5 +13,7 @@ for vue_version in $vue_versions; do
   npm install --no-save "vue@$vue_version"
 
   # Runs unit tests against this version.
-  npx mocha
+  # --exit is needed because Vue 2's nextTick scheduler opens a MessageChannel
+  # in Node that keeps the process alive after the tests finish.
+  npx mocha --exit
 done

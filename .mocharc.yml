@@ -1,0 +1,3 @@
+# Vue 2's nextTick scheduler opens a MessageChannel in Node that keeps the
+# process alive after tests finish, so mocha needs to force-exit.
+exit: true
