@@ -457,10 +457,10 @@ exports.VueDataObjectPath = class VueDataObjectPath {
 
       if (nextKey < 0) {
         throw new VueDataObjectPathError('Negative indexes are not allowed.');
-      } else if (nextKey > current[key].length) {
-        // Out of range. Extend array.
-        current.length = key;
       }
+
+      // No need to extend the array here. Vue's $set already grows the
+      // array to fit the index wherever nextKey ends up being written.
     } else {
       // This is treated as an object.
 

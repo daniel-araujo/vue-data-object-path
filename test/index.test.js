@@ -803,6 +803,23 @@ describe('VueDataObjectPath', () => {
         assert.strictEqual(vue.first[2], 'value');
       });
 
+      it('extends nested array without touching sibling elements', () => {
+        let vue = new Vue({
+          data: {
+            first: [['a', 'b'], ['c', 'd']]
+          }
+        });
+
+        vue.$objectPath.set(['first', 1, 4], 'value');
+
+        assert.strictEqual(vue.first.length, 2);
+        assert.deepStrictEqual(vue.first[0], ['a', 'b']);
+        assert.strictEqual(vue.first[1].length, 5);
+        assert.strictEqual(vue.first[1][2], undefined);
+        assert.strictEqual(vue.first[1][3], undefined);
+        assert.strictEqual(vue.first[1][4], 'value');
+      });
+
       it('negative indexes are not allowed', () => {
         let vue = new Vue({
           data: {
