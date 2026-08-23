@@ -21,7 +21,7 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "mocha": "^10.2.0",
+    "mocha": "^11.8.0",
     "vue": "^2.6.12"
   }
 }
