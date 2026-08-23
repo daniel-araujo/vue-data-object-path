@@ -1,8 +1,22 @@
 const assert = require('assert');
-const Vue = require('vue');
+const Vue = require('./vue-shim');
 const VueDataObjectPath = require('..');
 
 Vue.use(VueDataObjectPath);
+
+/**
+ * Vue 2 makes data properties reactive by mutating the original object
+ * in-place, so a value read back off the instance stays === the object
+ * that was originally passed into data(). Vue 3 wraps reactive data in a
+ * Proxy instead, so that identity does not hold there by design.
+ * @param {any} actual
+ * @param {any} expected
+ */
+function assertSameReferenceIfVue2(actual, expected) {
+  if (!Vue.version.startsWith('3.')) {
+    assert.strictEqual(actual, expected, 'Must reference same object.');
+  }
+}
 
 /**
  * Generates tests for invalid paths.
@@ -69,29 +83,54 @@ describe('VueDataObjectPath', () => {
   });
 
   describe('corner cases', () => {
-    it('fails when attempting to use before data method runs', async () => {
-      await assert.rejects(
-        new Promise((resolve, reject) => {
-          new Vue({
-            data() {
-              try {
-                this.$objectPath.get(['first']);
+    if (Vue.version.startsWith('3.')) {
+      // Vue 3 initializes $data to {} before running data(), unlike Vue 2
+      // which leaves it undefined until data() returns. There is no way to
+      // detect "before data method runs" there, so get() simply returns
+      // undefined instead of throwing.
+      it('returns undefined when used before data method runs', async () => {
+        await assert.doesNotReject(
+          new Promise((resolve, reject) => {
+            new Vue({
+              data() {
+                try {
+                  assert.strictEqual(this.$objectPath.get(['first']), undefined);
 
-                resolve();
-              } catch (e) {
-                reject(e);
+                  resolve();
+                } catch (e) {
+                  reject(e);
+                }
+
+                return {};
               }
+            });
+          }));
+      });
+    } else {
+      it('fails when attempting to use before data method runs', async () => {
+        await assert.rejects(
+          new Promise((resolve, reject) => {
+            new Vue({
+              data() {
+                try {
+                  this.$objectPath.get(['first']);
 
-              // This line only exists in case that does not fail otherwise Vue
-              // will complain about the data method not returning an object.
-              return {};
-            }
+                  resolve();
+                } catch (e) {
+                  reject(e);
+                }
+
+                // This line only exists in case that does not fail otherwise Vue
+                // will complain about the data method not returning an object.
+                return {};
+              }
+            });
+          }),
+          {
+            message: 'Data object is not accessible. Has the component finished running the data method?'
           });
-        }),
-        {
-          message: 'Data object is not accessible. Has the component finished running the data method?'
-        });
-    });
+      });
+    }
   });
 
   describe('string path', () => {
@@ -408,29 +447,58 @@ describe('VueDataObjectPath', () => {
         assert.strictEqual(value, undefined);
       });
 
-      it('is not reactive by simple assignment', () => {
-        let called = 0;
+      if (Vue.version.startsWith('3.')) {
+        // Vue 2 cannot detect a direct index assignment on an array
+        // (hence this test's name for Vue 2 below), but Vue 3's
+        // Proxy-based reactivity tracks it natively.
+        it('is reactive by simple assignment', () => {
+          let called = 0;
 
-        let vue = new Vue({
-          data: {
-            first: ['before'],
-          },
+          let vue = new Vue({
+            data: {
+              first: ['before'],
+            },
 
-          computed: {
-            get() {
-              called += 1;
-              return this.$objectPath.get(['first', 0]);
+            computed: {
+              get() {
+                called += 1;
+                return this.$objectPath.get(['first', 0]);
+              }
             }
-          }
+          });
+
+          assert.strictEqual(vue.get, 'before');
+
+          vue.first[0] = 'after';
+
+          assert.strictEqual(vue.get, 'after');
+          assert.strictEqual(called, 2);
         });
+      } else {
+        it('is not reactive by simple assignment', () => {
+          let called = 0;
 
-        assert.strictEqual(vue.get, 'before');
+          let vue = new Vue({
+            data: {
+              first: ['before'],
+            },
 
-        vue.first[0] = 'after';
+            computed: {
+              get() {
+                called += 1;
+                return this.$objectPath.get(['first', 0]);
+              }
+            }
+          });
 
-        assert.strictEqual(vue.get, 'before');
-        assert.strictEqual(called, 1);
-      });
+          assert.strictEqual(vue.get, 'before');
+
+          vue.first[0] = 'after';
+
+          assert.strictEqual(vue.get, 'before');
+          assert.strictEqual(called, 1);
+        });
+      }
 
       it('is reactive by assignment with $objectPath.set', () => {
         let called = 0;
@@ -1904,7 +1972,7 @@ describe('VueDataObjectPath', () => {
       vue.$objectPath.empty(['array']);
 
       assert.strictEqual(vue.array.length, 0);
-      assert.strictEqual(vue.array, array, 'Must reference same object.');
+      assertSameReferenceIfVue2(vue.array, array);
     });
 
     it('does nothing if array is already empty', () => {
@@ -1919,7 +1987,7 @@ describe('VueDataObjectPath', () => {
       vue.$objectPath.empty(['array']);
 
       assert.strictEqual(vue.array.length, 0);
-      assert.strictEqual(vue.array, array, 'Must reference same object.');
+      assertSameReferenceIfVue2(vue.array, array);
     });
 
     it('removes every key that the object owns', () => {
@@ -1939,7 +2007,7 @@ describe('VueDataObjectPath', () => {
       assert.strictEqual(Object.keys(vue.object).length, 0);
       assert.strictEqual(vue.object.first, undefined);
       assert.strictEqual(vue.object.second, undefined);
-      assert.strictEqual(vue.object, object, 'Must reference same object.');
+      assertSameReferenceIfVue2(vue.object, object);
     });
 
     it('does not remove object keys that are not enumerable', () => {
@@ -1963,7 +2031,7 @@ describe('VueDataObjectPath', () => {
       assert.strictEqual(Object.keys(vue.object).length, 0);
       assert.strictEqual(vue.object.first, undefined);
       assert.strictEqual(vue.object.second, 2);
-      assert.strictEqual(vue.object, object, 'Must reference same object.');
+      assertSameReferenceIfVue2(vue.object, object);
     });
 
     it('does nothing if object is already empty', () => {
@@ -1978,7 +2046,7 @@ describe('VueDataObjectPath', () => {
       vue.$objectPath.empty(['object']);
 
       assert.strictEqual(Object.keys(vue.object).length, 0);
-      assert.strictEqual(vue.object, object, 'Must reference same object.');
+      assertSameReferenceIfVue2(vue.object, object);
     });
 
     it('replaces string with empty string', () => {

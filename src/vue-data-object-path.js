@@ -8,6 +8,8 @@ const SET_NESTED = Symbol();
 const INTERMEDIATE_ACCESS = Symbol();
 const DATA_OBJ = Symbol();
 const SANITIZE_PATH = Symbol();
+const VUE_SET = Symbol();
+const VUE_DELETE = Symbol();
 
 exports.VueDataObjectPath = class VueDataObjectPath {
   /**
@@ -123,7 +125,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
           delete container[lastKey];
         }
       } else {
-        this[VUE].$delete(container, lastKey);
+        this[VUE_DELETE](container, lastKey);
       }
     }
   }
@@ -348,7 +350,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
       value.splice(0);
     } else if (typeof value === 'object') {
       for (let key in value) {
-        this[VUE].$delete(value, key);
+        this[VUE_DELETE](value, key);
       }
     } else if (typeof value === 'undefined') {
       // Do nothing.
@@ -437,7 +439,7 @@ exports.VueDataObjectPath = class VueDataObjectPath {
       }
 
       // Works on objects and arrays.
-      this[VUE].$set(current, lastKey, value);
+      this[VUE_SET](current, lastKey, value);
     }
   }
 
@@ -452,20 +454,21 @@ exports.VueDataObjectPath = class VueDataObjectPath {
       // This is treated as an array.
 
       if (current[key] === undefined) {
-        this[VUE].$set(current, key, []);
+        this[VUE_SET](current, key, []);
       }
 
       if (nextKey < 0) {
         throw new VueDataObjectPathError('Negative indexes are not allowed.');
       }
 
-      // No need to extend the array here. Vue's $set already grows the
-      // array to fit the index wherever nextKey ends up being written.
+      // No need to extend the array here. Writing to nextKey later grows
+      // the array to fit it, whether through Vue 2's $set or Vue 3's
+      // native Proxy-tracked array mutation.
     } else {
       // This is treated as an object.
 
       if (current[key] === undefined) {
-        this[VUE].$set(current, key, {});
+        this[VUE_SET](current, key, {});
       }
     }
   }
@@ -482,5 +485,36 @@ exports.VueDataObjectPath = class VueDataObjectPath {
     }
 
     return this[VUE].$data;
+  }
+
+  /**
+   * Sets a property so that it becomes reactive. Vue 2 requires the $set
+   * instance method for this; Vue 3's Proxy-based reactivity tracks new
+   * properties and array mutations natively.
+   * @param {object|any[]} obj
+   * @param {string|number} key
+   * @param {any} value
+   */
+  [VUE_SET](obj, key, value) {
+    if (typeof this[VUE].$set === 'function') {
+      this[VUE].$set(obj, key, value);
+    } else {
+      obj[key] = value;
+    }
+  }
+
+  /**
+   * Deletes a property while keeping it reactive. Vue 2 requires the
+   * $delete instance method for this; Vue 3's Proxy-based reactivity
+   * tracks property deletion natively.
+   * @param {object} obj
+   * @param {string} key
+   */
+  [VUE_DELETE](obj, key) {
+    if (typeof this[VUE].$delete === 'function') {
+      this[VUE].$delete(obj, key);
+    } else {
+      delete obj[key];
+    }
   }
 };

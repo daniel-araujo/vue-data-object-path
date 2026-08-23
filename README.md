@@ -26,8 +26,10 @@ $op.set('a.b.c.d.e.f', 'gun');
 $op.get('a.b.c.d.e.f'); // returns 'gun'.
 ```
 
-Tested with the latest release of every minor version of Vue.js 2 (from **2.0**
-to **2.6**).
+Works with both Vue.js 2 and Vue.js 3. Tested with the latest release of every
+minor version of Vue.js 2 (from **2.0** to **2.7**) and Vue.js 3 (from **3.1**
+to **3.5**). Vue 3.0 is not supported due to an upstream reactivity bug (fixed
+in 3.1).
 
 
 ## Install
@@ -39,12 +41,26 @@ npm install vue-data-object-path
 
 ## Usage
 
-Require the module `vue-data-object-path` and pass it to `Vue.use`.
+Require the module `vue-data-object-path` and pass it to `Vue.use` (Vue 2) or
+`app.use` (Vue 3).
+
+Vue 2:
 
 ```js
 const VueDataObjectPath = require('vue-data-object-path')
 
 Vue.use(VueDataObjectPath)
+```
+
+Vue 3:
+
+```js
+const { createApp } = require('vue')
+const VueDataObjectPath = require('vue-data-object-path')
+
+const app = createApp(/* ... */)
+
+app.use(VueDataObjectPath)
 ```
 
 You will then have access to `$objectPath` and `$op` in every Vue component.
